@@ -26,7 +26,7 @@ export const Route = createFileRoute("/_authenticated/economy")({
 
 const today = () => new Date().toISOString().slice(0, 10);
 const fmt = (n: number) =>
-  new Intl.NumberFormat("sv-SE", { style: "currency", currency: "SEK", maximumFractionDigits: 0 }).format(n);
+  new Intl.NumberFormat("sv-SE", { style: "currency", currency: "SEK", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
 
 // ---------- schemas ----------
 const accountSchema = z.object({
