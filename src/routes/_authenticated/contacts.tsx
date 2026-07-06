@@ -40,11 +40,14 @@ const schema = z.object({
   phone: z.string().max(30).optional().or(z.literal("")),
   email: z.string().trim().email("Ogiltig e-post").max(255).optional().or(z.literal("")),
   address: z.string().max(200).optional().or(z.literal("")),
+  postal_code: z.string().max(20).optional().or(z.literal("")),
+  city: z.string().max(120).optional().or(z.literal("")),
   notes: z.string().max(2000).optional().or(z.literal("")),
 });
 
 type Form = z.infer<typeof schema>;
-const empty: Form = { name: "", category: "", organization: "", phone: "", email: "", address: "", notes: "" };
+const empty: Form = { name: "", category: "", organization: "", phone: "", email: "", address: "", postal_code: "", city: "", notes: "" };
+
 
 function ContactsPage() {
   const qc = useQueryClient();
@@ -85,8 +88,11 @@ function ContactsPage() {
       phone: row.phone ?? "",
       email: row.email ?? "",
       address: row.address ?? "",
+      postal_code: row.postal_code ?? "",
+      city: row.city ?? "",
       notes: row.notes ?? "",
     });
+
     setOpen(true);
   };
 
@@ -105,7 +111,10 @@ function ContactsPage() {
       phone: parsed.data.phone || null,
       email: parsed.data.email || null,
       address: parsed.data.address || null,
+      postal_code: parsed.data.postal_code || null,
+      city: parsed.data.city || null,
       notes: parsed.data.notes || null,
+
     };
     const res = editing
       ? await supabase.from("contacts").update(payload).eq("id", editing)
@@ -173,7 +182,7 @@ function ContactsPage() {
                 <div className="mt-1 text-sm text-muted-foreground flex flex-wrap gap-x-4 gap-y-0.5">
                   {c.phone && <span>📞 {c.phone}</span>}
                   {c.email && <span>✉️ {c.email}</span>}
-                  {c.address && <span>📍 {c.address}</span>}
+                  {(c.address || c.postal_code || c.city) && <span>📍 {[c.address, [c.postal_code, c.city].filter(Boolean).join(" ")].filter(Boolean).join(", ")}</span>}
                 </div>
                 {c.notes && <p className="mt-2 text-sm whitespace-pre-wrap">{c.notes}</p>}
               </div>
@@ -222,8 +231,16 @@ function ContactDialog({
           <Input type="email" value={form.email ?? ""} onChange={(e) => setForm({ ...form, email: e.target.value })} />
         </div>
         <div className="space-y-1.5 sm:col-span-2">
-          <Label>Adress</Label>
+          <Label>Gatuadress</Label>
           <Input value={form.address ?? ""} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+        </div>
+        <div className="space-y-1.5">
+          <Label>Postnummer</Label>
+          <Input value={form.postal_code ?? ""} onChange={(e) => setForm({ ...form, postal_code: e.target.value })} />
+        </div>
+        <div className="space-y-1.5">
+          <Label>Ort</Label>
+          <Input value={form.city ?? ""} onChange={(e) => setForm({ ...form, city: e.target.value })} />
         </div>
         <div className="space-y-1.5 sm:col-span-2">
           <Label>Anteckningar</Label>

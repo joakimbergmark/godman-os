@@ -1,0 +1,2 @@
+ALTER TABLE public.principal ADD COLUMN IF NOT EXISTS postal_code text, ADD COLUMN IF NOT EXISTS city text;
+ALTER TABLE public.contacts ADD COLUMN IF NOT EXISTS postal_code text, ADD COLUMN IF NOT EXISTS city text;

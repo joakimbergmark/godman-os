@@ -18,6 +18,8 @@ const schema = z.object({
   full_name: z.string().trim().min(1, "Namn krävs").max(120),
   personal_number: z.string().trim().max(20).optional().or(z.literal("")),
   address: z.string().trim().max(200).optional().or(z.literal("")),
+  postal_code: z.string().trim().max(20).optional().or(z.literal("")),
+  city: z.string().trim().max(120).optional().or(z.literal("")),
   phone: z.string().trim().max(30).optional().or(z.literal("")),
   email: z.string().trim().email("Ogiltig e-post").max(255).optional().or(z.literal("")),
   notes: z.string().max(4000).optional().or(z.literal("")),
@@ -29,10 +31,13 @@ const empty: FormState = {
   full_name: "",
   personal_number: "",
   address: "",
+  postal_code: "",
+  city: "",
   phone: "",
   email: "",
   notes: "",
 };
+
 
 function PrincipalPage() {
   const qc = useQueryClient();
@@ -54,6 +59,8 @@ function PrincipalPage() {
         full_name: data.full_name ?? "",
         personal_number: data.personal_number ?? "",
         address: data.address ?? "",
+        postal_code: data.postal_code ?? "",
+        city: data.city ?? "",
         phone: data.phone ?? "",
         email: data.email ?? "",
         notes: data.notes ?? "",
@@ -75,6 +82,8 @@ function PrincipalPage() {
         full_name: parsed.data.full_name,
         personal_number: parsed.data.personal_number || null,
         address: parsed.data.address || null,
+        postal_code: parsed.data.postal_code || null,
+        city: parsed.data.city || null,
         phone: parsed.data.phone || null,
         email: parsed.data.email || null,
         notes: parsed.data.notes || null,
@@ -155,7 +164,7 @@ function PrincipalPage() {
                   />
                 </Field>
                 <div className="sm:col-span-2">
-                  <Field label="Adress" id="address">
+                  <Field label="Gatuadress" id="address">
                     <Input
                       id="address"
                       value={form.address ?? ""}
@@ -163,6 +172,20 @@ function PrincipalPage() {
                     />
                   </Field>
                 </div>
+                <Field label="Postnummer" id="postal_code">
+                  <Input
+                    id="postal_code"
+                    value={form.postal_code ?? ""}
+                    onChange={(e) => setForm({ ...form, postal_code: e.target.value })}
+                  />
+                </Field>
+                <Field label="Ort" id="city">
+                  <Input
+                    id="city"
+                    value={form.city ?? ""}
+                    onChange={(e) => setForm({ ...form, city: e.target.value })}
+                  />
+                </Field>
                 <div className="sm:col-span-2">
                   <Field label="Anteckningar" id="notes">
                     <Textarea
