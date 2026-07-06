@@ -82,6 +82,8 @@ function PrincipalPage() {
         full_name: parsed.data.full_name,
         personal_number: parsed.data.personal_number || null,
         address: parsed.data.address || null,
+        postal_code: parsed.data.postal_code || null,
+        city: parsed.data.city || null,
         phone: parsed.data.phone || null,
         email: parsed.data.email || null,
         notes: parsed.data.notes || null,
