@@ -267,7 +267,9 @@ function DocumentsPage() {
                   <div className="flex flex-wrap items-center gap-2">
                     <div className="font-semibold truncate">{d.title}</div>
                     {d.category && <Badge variant="secondary">{d.category}</Badge>}
+                    {!d.accounting_year_id && <Badge variant="outline" className="text-[10px]">Generellt</Badge>}
                   </div>
+
                   <div className="text-xs text-muted-foreground mt-0.5">
                     {d.file_name} · uppladdad {new Date(d.created_at).toLocaleDateString("sv-SE")}
                     {d.document_date && ` · datum ${new Date(d.document_date).toLocaleDateString("sv-SE")}`}
