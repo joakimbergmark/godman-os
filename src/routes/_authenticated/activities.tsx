@@ -42,6 +42,7 @@ function ActivitiesPage() {
   const qc = useQueryClient();
   const { highlight } = Route.useSearch();
   const navigate = useNavigate();
+  const { selectedId: yearId, selected: selectedYear } = useAccountingYear();
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<"activity_date" | "title" | "category">("activity_date");
   const [open, setOpen] = useState(false);
@@ -49,13 +50,19 @@ function ActivitiesPage() {
   const [form, setForm] = useState<Form>(empty);
 
   const { data = [] } = useQuery({
-    queryKey: ["activities"],
+    queryKey: ["activities", yearId],
+    enabled: !!yearId,
     queryFn: async () => {
-      const { data, error } = await supabase.from("activities").select("*").order("activity_date", { ascending: false });
+      const { data, error } = await supabase
+        .from("activities")
+        .select("*")
+        .eq("accounting_year_id", yearId!)
+        .order("activity_date", { ascending: false });
       if (error) throw error;
       return data;
     },
   });
+
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
