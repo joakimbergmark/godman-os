@@ -1,64 +1,57 @@
 
-## Tillägg 1 – Global sökfunktion
+## Problem
 
-**Placering:** Sökruta i `AppLayout` topbar, alltid synlig. Cmd/Ctrl+K öppnar också.
+När du klickar "Spara" på en befintlig aktivitet visas toasten **"Ej inloggad"** trots att du är inloggad. Samma mönster finns i flera formulär.
 
-**Beteende:**
-- Debounced input (250 ms), minst 2 tecken.
-- Klientsidig parallell fråga mot fem tabeller via Supabase (`.or(...ilike...)`). RLS filtrerar redan per användare, så inga extra restriktioner behövs. Ingen backend-endpoint krävs för MVP.
-- Case-insensitive "contains" via `ilike '%q%'`. Limit 10 per tabell.
-- Resultat i en dropdown/popover under sökrutan, grupperade per kategori med antal träffar.
+## Rotorsak
 
-**Sökta fält:**
-- activities: `title`, `description`, `category`, `tags`
-- documents: `title`, `category`, `comment`, `file_name`
-- contacts: `name`, `organization`, `email`, `phone`, `address`, `city`, `notes`
-- tasks: `title`, `description`, `status`, `priority`
-- principal: `full_name`, `personal_number`, `email`, `phone`, `address`, `city`, `notes`
+I `src/routes/_authenticated/activities.tsx` (rad 96–114) gör `save()` följande vid varje sparning:
 
-**Klickbeteende:**
-- Aktivitet → `/activities?highlight=<id>` (öppnar redigera-dialog)
-- Kontakt → `/contacts?highlight=<id>` (öppnar redigera-dialog)
-- Uppgift → `/tasks?highlight=<id>` (öppnar redigera-dialog)
-- Huvudman → `/principal`
-- Dokument → hämtar signerad URL från storage och öppnar i ny flik
-
-**Resultatvisning:** Varje rad visar de fält som specats (datum + rubrik + utdrag för aktiviteter, titel/kategori/datum för dokument, osv.).
-
-## Tillägg 2 – Tidslinjevy
-
-**Ny route:** `/_authenticated/timeline.tsx`. Menypost "Tidslinje" i sidomenyn.
-
-**Datakälla:** Parallella queries mot `activities`, `documents`, `tasks`. Normaliseras till gemensamt format:
-
-```text
-{ type, title, description, created_at, ref_id, meta }
+```ts
+const { data: userRes } = await supabase.auth.getUser();
+const owner_id = userRes.user?.id;
+if (!owner_id) return toast.error("Ej inloggad");
 ```
 
-- Aktivitet: title = `title`, description = `description`, meta.date = `activity_date`
-- Dokument: title = `title`, description = `Kategori: X`, meta.file_name / storage_path
-- Uppgift: title = `title`, description = status, meta.status/deadline
+Två problem:
 
-Slås samman och sorteras på `created_at` desc, klientsidigt. Ingen databasvy krävs för MVP (dataset litet).
+1. **`getUser()` gör ett nätverksanrop** till Supabase Auth vid varje spar-klick. Om anropet returnerar fel eller är långsamt/avbrutet (nätverkshick, token-refresh pågår, dialog stängs och avbryter fetch, etc.) tolkas det som "inte inloggad" – trots giltig session. Auth-loggarna visar återkommande `/user`-anrop; ett enda som misslyckas ger detta fel.
+2. **`owner_id` skickas med i UPDATE-payloaden** även vid redigering. Det behövs inte – RLS-policyn `auth.uid() = owner_id` skyddar redan raden, och `owner_id` sattes vid insert. Att skicka med den vid update ökar bara ytan för fel.
 
-**UI:**
-- En scrollvy, vertikal tidslinje med ikon per typ (📌 aktivitet, 📎 dokument, ✅/⏳ uppgift).
-- Varje kort visar datum, titel, kort beskrivning.
-- Klick öppnar motsvarande detaljvy (samma highlight-mönster som sök).
-- Append-only: ingen redigering här.
-- Filter lämnas till senare.
+Samma mönster finns även i `contacts.tsx`, `tasks.tsx`, `principal.tsx`, `documents.tsx` – alla har samma potentiella brist.
 
-## Teknisk implementation
+## Åtgärd
 
-**Nya/ändrade filer:**
-- `src/components/GlobalSearch.tsx` – input, debounce, popover, gruppresultat, navigation.
-- `src/components/AppLayout.tsx` – montera `<GlobalSearch />` i topbar.
-- `src/routes/_authenticated/timeline.tsx` – ny route.
-- `src/routes/_authenticated/activities.tsx`, `contacts.tsx`, `tasks.tsx` – läs `?highlight=<id>` via `validateSearch` och auto-öppna edit-dialog för den raden.
-- `src/routeTree.gen.ts` regenereras automatiskt.
+### 1. Använd cached session istället för getUser() vid mutation
 
-**Ingen databasmigration** – befintliga kolumner räcker. Datasetet förväntas litet (privat användare), så klientsidig fan-out är tillräckligt snabbt. Om det växer kan vi senare lägga till Postgres `pg_trgm`-index eller en SQL-vy `activity_timeline_view`.
+Ersätt `supabase.auth.getUser()` med `supabase.auth.getSession()` som läser cachad session lokalt utan nätverksanrop. Snabbare, mer robust, samma säkerhet (RLS validerar bearer-token på servern).
 
-## Öppna frågor
+### 2. Skicka inte `owner_id` vid UPDATE
 
-Inga — jag går på ovanstående defaults om du inte säger annat.
+Vid redigering: skicka bara de faktiskt ändrade fälten. `owner_id` sätts endast vid INSERT.
+
+```ts
+const res = editing
+  ? await supabase.from("activities").update({
+      activity_date, title, description, category, tags,
+    }).eq("id", editing)
+  : await supabase.from("activities").insert({ owner_id, ...rest });
+```
+
+### 3. Applicera samma mönster på övriga formulär
+
+Uppdatera `contacts.tsx`, `tasks.tsx`, `principal.tsx`, `documents.tsx` med samma två fix så att felet inte kan uppstå någon annanstans.
+
+### 4. Om sessionen faktiskt saknas → redirect till /auth
+
+Istället för bara en toast: om `getSession()` returnerar `null` betyder det att gate:n missat något – redirect till `/auth` med `navigate({ to: "/auth" })` så användaren kan logga in igen.
+
+## Filer som ändras
+
+- `src/routes/_authenticated/activities.tsx`
+- `src/routes/_authenticated/contacts.tsx`
+- `src/routes/_authenticated/tasks.tsx`
+- `src/routes/_authenticated/principal.tsx`
+- `src/routes/_authenticated/documents.tsx`
+
+Inga databasändringar behövs – RLS-policyerna är redan korrekta.
