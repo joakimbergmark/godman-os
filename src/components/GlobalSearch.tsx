@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { Search, Loader2, Activity, FileText, Users, CheckSquare, User } from "lucide-react";
+import { Search, Loader2, Activity, FileText, Users, CheckSquare, User, Wallet } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -10,7 +10,9 @@ type Hit =
   | { type: "document"; id: string; title: string; category?: string | null; date?: string | null; storage_path: string }
   | { type: "contact"; id: string; name: string; organization?: string | null }
   | { type: "task"; id: string; title: string; status: string }
-  | { type: "principal"; id: string; full_name: string };
+  | { type: "principal"; id: string; full_name: string }
+  | { type: "transaction"; id: string; comment: string; amount: number; txType: string; date: string };
+
 
 const escapeIlike = (q: string) => q.replace(/[%_,()]/g, " ").trim();
 
