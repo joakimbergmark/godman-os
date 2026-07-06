@@ -38,6 +38,8 @@ const empty: Form = { activity_date: today(), title: "", description: "", catego
 
 function ActivitiesPage() {
   const qc = useQueryClient();
+  const { highlight } = Route.useSearch();
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<"activity_date" | "title" | "category">("activity_date");
   const [open, setOpen] = useState(false);
