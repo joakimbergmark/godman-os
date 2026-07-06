@@ -116,7 +116,7 @@ function TimelineCard({ item, onClick }: { item: Item; onClick: () => void }) {
             {item.description && (
               <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2 whitespace-pre-wrap">{item.description}</p>
             )}
-            {item.type === "document" && item.meta.file_name && (
+            {item.type === "document" && Boolean(item.meta.file_name) && (
               <div className="text-xs text-muted-foreground mt-0.5 truncate">📎 {String(item.meta.file_name)}</div>
             )}
             {item.type === "task" && (
