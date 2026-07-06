@@ -110,11 +110,13 @@ function DocumentsPage() {
 
     setUploading(true);
     try {
+      const accounting_year_id = parsed.data.year_scope === "general" ? null : yearId;
       const base = {
         title: parsed.data.title,
         category: parsed.data.category || null,
         document_date: parsed.data.document_date || null,
         comment: parsed.data.comment || null,
+        accounting_year_id,
       };
 
       if (editing) {
@@ -131,6 +133,7 @@ function DocumentsPage() {
       } else {
         if (!file) throw new Error("Välj en fil att ladda upp");
         if (file.size > 20 * 1024 * 1024) throw new Error("Max 20 MB per fil");
+        if (parsed.data.year_scope === "current" && !yearId) throw new Error("Välj redovisningsår först");
         const path = `${owner_id}/${crypto.randomUUID()}-${file.name}`;
         const up = await supabase.storage.from("documents").upload(path, file);
         if (up.error) throw up.error;
@@ -140,6 +143,7 @@ function DocumentsPage() {
         });
         if (error) throw error;
       }
+
       toast.success(editing ? "Sparat" : "Uppladdad");
       setOpen(false);
       qc.invalidateQueries({ queryKey: ["documents"] });
