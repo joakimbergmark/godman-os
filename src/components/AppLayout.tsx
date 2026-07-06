@@ -107,9 +107,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-14 border-b border-border flex items-center gap-3 px-3 sticky top-0 bg-background/80 backdrop-blur z-10">
+          <header className="h-16 border-b border-border flex items-center gap-3 px-4 sticky top-0 bg-background/90 backdrop-blur z-10 shadow-sm">
             <SidebarTrigger />
-            <h1 className="text-sm font-medium text-muted-foreground truncate hidden sm:block min-w-[80px]">
+            <h1 className="text-lg font-semibold text-foreground truncate hidden sm:block min-w-[100px]">
               {current?.title ?? ""}
             </h1>
             <div className="flex-1 flex justify-center">
