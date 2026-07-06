@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedYearOverviewRouteImport } from './routes/_authenticated/year-overview'
 import { Route as AuthenticatedTimelineRouteImport } from './routes/_authenticated/timeline'
 import { Route as AuthenticatedTasksRouteImport } from './routes/_authenticated/tasks'
 import { Route as AuthenticatedPrincipalRouteImport } from './routes/_authenticated/principal'
@@ -34,6 +35,12 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedYearOverviewRoute =
+  AuthenticatedYearOverviewRouteImport.update({
+    id: '/year-overview',
+    path: '/year-overview',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedTimelineRoute = AuthenticatedTimelineRouteImport.update({
   id: '/timeline',
   path: '/timeline',
@@ -80,6 +87,7 @@ export interface FileRoutesByFullPath {
   '/principal': typeof AuthenticatedPrincipalRoute
   '/tasks': typeof AuthenticatedTasksRoute
   '/timeline': typeof AuthenticatedTimelineRoute
+  '/year-overview': typeof AuthenticatedYearOverviewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -91,6 +99,7 @@ export interface FileRoutesByTo {
   '/principal': typeof AuthenticatedPrincipalRoute
   '/tasks': typeof AuthenticatedTasksRoute
   '/timeline': typeof AuthenticatedTimelineRoute
+  '/year-overview': typeof AuthenticatedYearOverviewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -104,6 +113,7 @@ export interface FileRoutesById {
   '/_authenticated/principal': typeof AuthenticatedPrincipalRoute
   '/_authenticated/tasks': typeof AuthenticatedTasksRoute
   '/_authenticated/timeline': typeof AuthenticatedTimelineRoute
+  '/_authenticated/year-overview': typeof AuthenticatedYearOverviewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -117,6 +127,7 @@ export interface FileRouteTypes {
     | '/principal'
     | '/tasks'
     | '/timeline'
+    | '/year-overview'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -128,6 +139,7 @@ export interface FileRouteTypes {
     | '/principal'
     | '/tasks'
     | '/timeline'
+    | '/year-overview'
   id:
     | '__root__'
     | '/'
@@ -140,6 +152,7 @@ export interface FileRouteTypes {
     | '/_authenticated/principal'
     | '/_authenticated/tasks'
     | '/_authenticated/timeline'
+    | '/_authenticated/year-overview'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -170,6 +183,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/year-overview': {
+      id: '/_authenticated/year-overview'
+      path: '/year-overview'
+      fullPath: '/year-overview'
+      preLoaderRoute: typeof AuthenticatedYearOverviewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/timeline': {
       id: '/_authenticated/timeline'
@@ -231,6 +251,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPrincipalRoute: typeof AuthenticatedPrincipalRoute
   AuthenticatedTasksRoute: typeof AuthenticatedTasksRoute
   AuthenticatedTimelineRoute: typeof AuthenticatedTimelineRoute
+  AuthenticatedYearOverviewRoute: typeof AuthenticatedYearOverviewRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -241,6 +262,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPrincipalRoute: AuthenticatedPrincipalRoute,
   AuthenticatedTasksRoute: AuthenticatedTasksRoute,
   AuthenticatedTimelineRoute: AuthenticatedTimelineRoute,
+  AuthenticatedYearOverviewRoute: AuthenticatedYearOverviewRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
