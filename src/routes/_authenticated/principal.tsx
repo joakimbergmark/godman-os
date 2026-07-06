@@ -59,6 +59,8 @@ function PrincipalPage() {
         full_name: data.full_name ?? "",
         personal_number: data.personal_number ?? "",
         address: data.address ?? "",
+        postal_code: data.postal_code ?? "",
+        city: data.city ?? "",
         phone: data.phone ?? "",
         email: data.email ?? "",
         notes: data.notes ?? "",
