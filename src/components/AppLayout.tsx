@@ -26,6 +26,8 @@ import {
   Clock,
   CalendarDays,
   Coins,
+  BookOpen,
+
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -45,6 +47,7 @@ const items = [
   { title: "Dokument", url: "/documents", icon: FileText },
   { title: "Uppgifter", url: "/tasks", icon: CheckSquare },
   { title: "Årsöversikt", url: "/year-overview", icon: CalendarDays },
+  { title: "Användarguide", url: "/guide", icon: BookOpen },
 ] as const;
 
 

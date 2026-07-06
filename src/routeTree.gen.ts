@@ -16,11 +16,19 @@ import { Route as AuthenticatedYearOverviewRouteImport } from './routes/_authent
 import { Route as AuthenticatedTimelineRouteImport } from './routes/_authenticated/timeline'
 import { Route as AuthenticatedTasksRouteImport } from './routes/_authenticated/tasks'
 import { Route as AuthenticatedPrincipalRouteImport } from './routes/_authenticated/principal'
+import { Route as AuthenticatedGuideRouteImport } from './routes/_authenticated/guide'
 import { Route as AuthenticatedEconomyRouteImport } from './routes/_authenticated/economy'
 import { Route as AuthenticatedDocumentsRouteImport } from './routes/_authenticated/documents'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedContactsRouteImport } from './routes/_authenticated/contacts'
 import { Route as AuthenticatedActivitiesRouteImport } from './routes/_authenticated/activities'
+import { Route as AuthenticatedGuideIndexRouteImport } from './routes/_authenticated/guide.index'
+import { Route as AuthenticatedGuideVidareutvecklingRouteImport } from './routes/_authenticated/guide.vidareutveckling'
+import { Route as AuthenticatedGuideRedovisningsarRouteImport } from './routes/_authenticated/guide.redovisningsar'
+import { Route as AuthenticatedGuideModulerRouteImport } from './routes/_authenticated/guide.moduler'
+import { Route as AuthenticatedGuideKomIgangRouteImport } from './routes/_authenticated/guide.kom-igang'
+import { Route as AuthenticatedGuideEkonomiRouteImport } from './routes/_authenticated/guide.ekonomi'
+import { Route as AuthenticatedGuideArbetsflodeRouteImport } from './routes/_authenticated/guide.arbetsflode'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -57,6 +65,11 @@ const AuthenticatedPrincipalRoute = AuthenticatedPrincipalRouteImport.update({
   path: '/principal',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedGuideRoute = AuthenticatedGuideRouteImport.update({
+  id: '/guide',
+  path: '/guide',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedEconomyRoute = AuthenticatedEconomyRouteImport.update({
   id: '/economy',
   path: '/economy',
@@ -82,6 +95,47 @@ const AuthenticatedActivitiesRoute = AuthenticatedActivitiesRouteImport.update({
   path: '/activities',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedGuideIndexRoute = AuthenticatedGuideIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedGuideRoute,
+} as any)
+const AuthenticatedGuideVidareutvecklingRoute =
+  AuthenticatedGuideVidareutvecklingRouteImport.update({
+    id: '/vidareutveckling',
+    path: '/vidareutveckling',
+    getParentRoute: () => AuthenticatedGuideRoute,
+  } as any)
+const AuthenticatedGuideRedovisningsarRoute =
+  AuthenticatedGuideRedovisningsarRouteImport.update({
+    id: '/redovisningsar',
+    path: '/redovisningsar',
+    getParentRoute: () => AuthenticatedGuideRoute,
+  } as any)
+const AuthenticatedGuideModulerRoute =
+  AuthenticatedGuideModulerRouteImport.update({
+    id: '/moduler',
+    path: '/moduler',
+    getParentRoute: () => AuthenticatedGuideRoute,
+  } as any)
+const AuthenticatedGuideKomIgangRoute =
+  AuthenticatedGuideKomIgangRouteImport.update({
+    id: '/kom-igang',
+    path: '/kom-igang',
+    getParentRoute: () => AuthenticatedGuideRoute,
+  } as any)
+const AuthenticatedGuideEkonomiRoute =
+  AuthenticatedGuideEkonomiRouteImport.update({
+    id: '/ekonomi',
+    path: '/ekonomi',
+    getParentRoute: () => AuthenticatedGuideRoute,
+  } as any)
+const AuthenticatedGuideArbetsflodeRoute =
+  AuthenticatedGuideArbetsflodeRouteImport.update({
+    id: '/arbetsflode',
+    path: '/arbetsflode',
+    getParentRoute: () => AuthenticatedGuideRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -91,10 +145,18 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/documents': typeof AuthenticatedDocumentsRoute
   '/economy': typeof AuthenticatedEconomyRoute
+  '/guide': typeof AuthenticatedGuideRouteWithChildren
   '/principal': typeof AuthenticatedPrincipalRoute
   '/tasks': typeof AuthenticatedTasksRoute
   '/timeline': typeof AuthenticatedTimelineRoute
   '/year-overview': typeof AuthenticatedYearOverviewRoute
+  '/guide/arbetsflode': typeof AuthenticatedGuideArbetsflodeRoute
+  '/guide/ekonomi': typeof AuthenticatedGuideEkonomiRoute
+  '/guide/kom-igang': typeof AuthenticatedGuideKomIgangRoute
+  '/guide/moduler': typeof AuthenticatedGuideModulerRoute
+  '/guide/redovisningsar': typeof AuthenticatedGuideRedovisningsarRoute
+  '/guide/vidareutveckling': typeof AuthenticatedGuideVidareutvecklingRoute
+  '/guide/': typeof AuthenticatedGuideIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -108,6 +170,13 @@ export interface FileRoutesByTo {
   '/tasks': typeof AuthenticatedTasksRoute
   '/timeline': typeof AuthenticatedTimelineRoute
   '/year-overview': typeof AuthenticatedYearOverviewRoute
+  '/guide/arbetsflode': typeof AuthenticatedGuideArbetsflodeRoute
+  '/guide/ekonomi': typeof AuthenticatedGuideEkonomiRoute
+  '/guide/kom-igang': typeof AuthenticatedGuideKomIgangRoute
+  '/guide/moduler': typeof AuthenticatedGuideModulerRoute
+  '/guide/redovisningsar': typeof AuthenticatedGuideRedovisningsarRoute
+  '/guide/vidareutveckling': typeof AuthenticatedGuideVidareutvecklingRoute
+  '/guide': typeof AuthenticatedGuideIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -119,10 +188,18 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/documents': typeof AuthenticatedDocumentsRoute
   '/_authenticated/economy': typeof AuthenticatedEconomyRoute
+  '/_authenticated/guide': typeof AuthenticatedGuideRouteWithChildren
   '/_authenticated/principal': typeof AuthenticatedPrincipalRoute
   '/_authenticated/tasks': typeof AuthenticatedTasksRoute
   '/_authenticated/timeline': typeof AuthenticatedTimelineRoute
   '/_authenticated/year-overview': typeof AuthenticatedYearOverviewRoute
+  '/_authenticated/guide/arbetsflode': typeof AuthenticatedGuideArbetsflodeRoute
+  '/_authenticated/guide/ekonomi': typeof AuthenticatedGuideEkonomiRoute
+  '/_authenticated/guide/kom-igang': typeof AuthenticatedGuideKomIgangRoute
+  '/_authenticated/guide/moduler': typeof AuthenticatedGuideModulerRoute
+  '/_authenticated/guide/redovisningsar': typeof AuthenticatedGuideRedovisningsarRoute
+  '/_authenticated/guide/vidareutveckling': typeof AuthenticatedGuideVidareutvecklingRoute
+  '/_authenticated/guide/': typeof AuthenticatedGuideIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -134,10 +211,18 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/documents'
     | '/economy'
+    | '/guide'
     | '/principal'
     | '/tasks'
     | '/timeline'
     | '/year-overview'
+    | '/guide/arbetsflode'
+    | '/guide/ekonomi'
+    | '/guide/kom-igang'
+    | '/guide/moduler'
+    | '/guide/redovisningsar'
+    | '/guide/vidareutveckling'
+    | '/guide/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -151,6 +236,13 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/timeline'
     | '/year-overview'
+    | '/guide/arbetsflode'
+    | '/guide/ekonomi'
+    | '/guide/kom-igang'
+    | '/guide/moduler'
+    | '/guide/redovisningsar'
+    | '/guide/vidareutveckling'
+    | '/guide'
   id:
     | '__root__'
     | '/'
@@ -161,10 +253,18 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/documents'
     | '/_authenticated/economy'
+    | '/_authenticated/guide'
     | '/_authenticated/principal'
     | '/_authenticated/tasks'
     | '/_authenticated/timeline'
     | '/_authenticated/year-overview'
+    | '/_authenticated/guide/arbetsflode'
+    | '/_authenticated/guide/ekonomi'
+    | '/_authenticated/guide/kom-igang'
+    | '/_authenticated/guide/moduler'
+    | '/_authenticated/guide/redovisningsar'
+    | '/_authenticated/guide/vidareutveckling'
+    | '/_authenticated/guide/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -224,6 +324,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPrincipalRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/guide': {
+      id: '/_authenticated/guide'
+      path: '/guide'
+      fullPath: '/guide'
+      preLoaderRoute: typeof AuthenticatedGuideRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/economy': {
       id: '/_authenticated/economy'
       path: '/economy'
@@ -259,8 +366,81 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedActivitiesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/guide/': {
+      id: '/_authenticated/guide/'
+      path: '/'
+      fullPath: '/guide/'
+      preLoaderRoute: typeof AuthenticatedGuideIndexRouteImport
+      parentRoute: typeof AuthenticatedGuideRoute
+    }
+    '/_authenticated/guide/vidareutveckling': {
+      id: '/_authenticated/guide/vidareutveckling'
+      path: '/vidareutveckling'
+      fullPath: '/guide/vidareutveckling'
+      preLoaderRoute: typeof AuthenticatedGuideVidareutvecklingRouteImport
+      parentRoute: typeof AuthenticatedGuideRoute
+    }
+    '/_authenticated/guide/redovisningsar': {
+      id: '/_authenticated/guide/redovisningsar'
+      path: '/redovisningsar'
+      fullPath: '/guide/redovisningsar'
+      preLoaderRoute: typeof AuthenticatedGuideRedovisningsarRouteImport
+      parentRoute: typeof AuthenticatedGuideRoute
+    }
+    '/_authenticated/guide/moduler': {
+      id: '/_authenticated/guide/moduler'
+      path: '/moduler'
+      fullPath: '/guide/moduler'
+      preLoaderRoute: typeof AuthenticatedGuideModulerRouteImport
+      parentRoute: typeof AuthenticatedGuideRoute
+    }
+    '/_authenticated/guide/kom-igang': {
+      id: '/_authenticated/guide/kom-igang'
+      path: '/kom-igang'
+      fullPath: '/guide/kom-igang'
+      preLoaderRoute: typeof AuthenticatedGuideKomIgangRouteImport
+      parentRoute: typeof AuthenticatedGuideRoute
+    }
+    '/_authenticated/guide/ekonomi': {
+      id: '/_authenticated/guide/ekonomi'
+      path: '/ekonomi'
+      fullPath: '/guide/ekonomi'
+      preLoaderRoute: typeof AuthenticatedGuideEkonomiRouteImport
+      parentRoute: typeof AuthenticatedGuideRoute
+    }
+    '/_authenticated/guide/arbetsflode': {
+      id: '/_authenticated/guide/arbetsflode'
+      path: '/arbetsflode'
+      fullPath: '/guide/arbetsflode'
+      preLoaderRoute: typeof AuthenticatedGuideArbetsflodeRouteImport
+      parentRoute: typeof AuthenticatedGuideRoute
+    }
   }
 }
+
+interface AuthenticatedGuideRouteChildren {
+  AuthenticatedGuideArbetsflodeRoute: typeof AuthenticatedGuideArbetsflodeRoute
+  AuthenticatedGuideEkonomiRoute: typeof AuthenticatedGuideEkonomiRoute
+  AuthenticatedGuideKomIgangRoute: typeof AuthenticatedGuideKomIgangRoute
+  AuthenticatedGuideModulerRoute: typeof AuthenticatedGuideModulerRoute
+  AuthenticatedGuideRedovisningsarRoute: typeof AuthenticatedGuideRedovisningsarRoute
+  AuthenticatedGuideVidareutvecklingRoute: typeof AuthenticatedGuideVidareutvecklingRoute
+  AuthenticatedGuideIndexRoute: typeof AuthenticatedGuideIndexRoute
+}
+
+const AuthenticatedGuideRouteChildren: AuthenticatedGuideRouteChildren = {
+  AuthenticatedGuideArbetsflodeRoute: AuthenticatedGuideArbetsflodeRoute,
+  AuthenticatedGuideEkonomiRoute: AuthenticatedGuideEkonomiRoute,
+  AuthenticatedGuideKomIgangRoute: AuthenticatedGuideKomIgangRoute,
+  AuthenticatedGuideModulerRoute: AuthenticatedGuideModulerRoute,
+  AuthenticatedGuideRedovisningsarRoute: AuthenticatedGuideRedovisningsarRoute,
+  AuthenticatedGuideVidareutvecklingRoute:
+    AuthenticatedGuideVidareutvecklingRoute,
+  AuthenticatedGuideIndexRoute: AuthenticatedGuideIndexRoute,
+}
+
+const AuthenticatedGuideRouteWithChildren =
+  AuthenticatedGuideRoute._addFileChildren(AuthenticatedGuideRouteChildren)
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedActivitiesRoute: typeof AuthenticatedActivitiesRoute
@@ -268,6 +448,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDocumentsRoute: typeof AuthenticatedDocumentsRoute
   AuthenticatedEconomyRoute: typeof AuthenticatedEconomyRoute
+  AuthenticatedGuideRoute: typeof AuthenticatedGuideRouteWithChildren
   AuthenticatedPrincipalRoute: typeof AuthenticatedPrincipalRoute
   AuthenticatedTasksRoute: typeof AuthenticatedTasksRoute
   AuthenticatedTimelineRoute: typeof AuthenticatedTimelineRoute
@@ -280,6 +461,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDocumentsRoute: AuthenticatedDocumentsRoute,
   AuthenticatedEconomyRoute: AuthenticatedEconomyRoute,
+  AuthenticatedGuideRoute: AuthenticatedGuideRouteWithChildren,
   AuthenticatedPrincipalRoute: AuthenticatedPrincipalRoute,
   AuthenticatedTasksRoute: AuthenticatedTasksRoute,
   AuthenticatedTimelineRoute: AuthenticatedTimelineRoute,
