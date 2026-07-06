@@ -318,7 +318,13 @@ function useCategories() {
 }
 
 // ---------- Transactions ----------
-function Transactions({ yearId, principalId }: { yearId: string | null; principalId: string }) {
+function Transactions({
+  viewYearId, defaultYearId, principalId,
+}: {
+  viewYearId: string | null;
+  defaultYearId: string | null;
+  principalId: string;
+}) {
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -326,6 +332,7 @@ function Transactions({ yearId, principalId }: { yearId: string | null; principa
   const [form, setForm] = useState<TxForm>(emptyTx);
   const [filterType, setFilterType] = useState<"all" | "income" | "expense" | "transfer">("all");
   const [filterCategory, setFilterCategory] = useState<string>("all");
+  const [sortKey, setSortKey] = useState<"date_desc" | "date_asc" | "amount_desc" | "amount_asc">("date_desc");
   const [newCatOpen, setNewCatOpen] = useState(false);
   const [newCat, setNewCat] = useState<{ name: string; kind: "income" | "expense" }>({ name: "", kind: "expense" });
 
@@ -349,23 +356,30 @@ function Transactions({ yearId, principalId }: { yearId: string | null; principa
   });
 
   const { data: txs = [] } = useQuery({
-    queryKey: ["transactions", yearId],
-    enabled: !!yearId,
+    queryKey: ["transactions", viewYearId ?? "all", principalId],
     queryFn: async () => {
-      const { data, error } = await supabase.from("transactions").select("*")
-        .eq("accounting_year_id", yearId!).order("transaction_date", { ascending: false });
+      let q = supabase.from("transactions").select("*").eq("principal_id", principalId);
+      if (viewYearId) q = q.eq("accounting_year_id", viewYearId);
+      const { data, error } = await q.order("transaction_date", { ascending: false });
       if (error) throw error;
       return data;
     },
   });
 
   const filtered = useMemo(() => {
-    return txs.filter((t) => {
+    const rows = txs.filter((t) => {
       if (filterType !== "all" && t.type !== filterType) return false;
       if (filterCategory !== "all" && t.category_id !== filterCategory) return false;
       return true;
     });
-  }, [txs, filterType, filterCategory]);
+    const sorted = [...rows].sort((a, b) => {
+      if (sortKey === "date_desc") return String(b.transaction_date).localeCompare(String(a.transaction_date));
+      if (sortKey === "date_asc") return String(a.transaction_date).localeCompare(String(b.transaction_date));
+      const av = Number(a.amount), bv = Number(b.amount);
+      return sortKey === "amount_desc" ? bv - av : av - bv;
+    });
+    return sorted;
+  }, [txs, filterType, filterCategory, sortKey]);
 
   const accountName = (id: string | null) => accounts.find((a) => a.id === id)?.name ?? "—";
   const categoryName = (id: string | null) => categories.find((c) => c.id === id)?.name ?? "";
