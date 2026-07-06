@@ -40,6 +40,7 @@ const empty: Meta = { title: "", category: "", document_date: "", comment: "", y
 function DocumentsPage() {
   const qc = useQueryClient();
   const navigate = useNavigate();
+  const { selectedId: yearId, selected: selectedYear } = useAccountingYear();
 
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<"created_at" | "title" | "category" | "document_date">("created_at");
@@ -51,13 +52,20 @@ function DocumentsPage() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const { data = [] } = useQuery({
-    queryKey: ["documents"],
+    queryKey: ["documents", yearId],
+    enabled: !!yearId,
     queryFn: async () => {
-      const { data, error } = await supabase.from("documents").select("*").order("created_at", { ascending: false });
+      // Show documents for selected year OR general (accounting_year_id is null)
+      const { data, error } = await supabase
+        .from("documents")
+        .select("*")
+        .or(`accounting_year_id.eq.${yearId},accounting_year_id.is.null`)
+        .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
     },
   });
+
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
