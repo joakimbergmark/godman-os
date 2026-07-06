@@ -204,7 +204,21 @@ function DocumentsPage() {
                 <Input type="date" value={form.document_date ?? ""} onChange={(e) => setForm({ ...form, document_date: e.target.value })} />
               </div>
               <div className="space-y-1.5 sm:col-span-2">
-                <Label>Kommentar</Label>
+                <Label>Redovisningsår</Label>
+                <Select
+                  value={form.year_scope}
+                  onValueChange={(v) => setForm({ ...form, year_scope: v as "current" | "general" })}
+                >
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="current">
+                      Bundet till {selectedYear ? selectedYear.year : "aktuellt år"}
+                    </SelectItem>
+                    <SelectItem value="general">Generellt (visas alla år)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
                 <Textarea rows={3} value={form.comment ?? ""} onChange={(e) => setForm({ ...form, comment: e.target.value })} />
               </div>
               <div className="space-y-1.5 sm:col-span-2">
