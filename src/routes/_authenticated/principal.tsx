@@ -18,6 +18,8 @@ const schema = z.object({
   full_name: z.string().trim().min(1, "Namn krävs").max(120),
   personal_number: z.string().trim().max(20).optional().or(z.literal("")),
   address: z.string().trim().max(200).optional().or(z.literal("")),
+  postal_code: z.string().trim().max(20).optional().or(z.literal("")),
+  city: z.string().trim().max(120).optional().or(z.literal("")),
   phone: z.string().trim().max(30).optional().or(z.literal("")),
   email: z.string().trim().email("Ogiltig e-post").max(255).optional().or(z.literal("")),
   notes: z.string().max(4000).optional().or(z.literal("")),
@@ -29,10 +31,13 @@ const empty: FormState = {
   full_name: "",
   personal_number: "",
   address: "",
+  postal_code: "",
+  city: "",
   phone: "",
   email: "",
   notes: "",
 };
+
 
 function PrincipalPage() {
   const qc = useQueryClient();
