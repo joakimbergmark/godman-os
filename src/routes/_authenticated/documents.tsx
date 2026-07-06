@@ -31,9 +31,11 @@ const metaSchema = z.object({
   category: z.string().max(60).optional().or(z.literal("")),
   document_date: z.string().optional().or(z.literal("")),
   comment: z.string().max(2000).optional().or(z.literal("")),
+  year_scope: z.enum(["current", "general"]),
 });
 type Meta = z.infer<typeof metaSchema>;
-const empty: Meta = { title: "", category: "", document_date: "", comment: "" };
+const empty: Meta = { title: "", category: "", document_date: "", comment: "", year_scope: "current" };
+
 
 function DocumentsPage() {
   const qc = useQueryClient();
