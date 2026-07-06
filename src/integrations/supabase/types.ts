@@ -55,6 +55,59 @@ export type Database = {
           },
         ]
       }
+      accounts: {
+        Row: {
+          account_number: string | null
+          account_type: string
+          bank_name: string | null
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+          opening_balance: number
+          opening_balance_date: string | null
+          owner_id: string
+          principal_id: string
+          updated_at: string
+        }
+        Insert: {
+          account_number?: string | null
+          account_type?: string
+          bank_name?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string | null
+          opening_balance?: number
+          opening_balance_date?: string | null
+          owner_id: string
+          principal_id: string
+          updated_at?: string
+        }
+        Update: {
+          account_number?: string | null
+          account_type?: string
+          bank_name?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          opening_balance?: number
+          opening_balance_date?: string | null
+          owner_id?: string
+          principal_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounts_principal_id_fkey"
+            columns: ["principal_id"]
+            isOneToOne: false
+            referencedRelation: "principal"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       activities: {
         Row: {
           accounting_year_id: string | null
@@ -294,6 +347,127 @@ export type Database = {
             columns: ["accounting_year_id"]
             isOneToOne: false
             referencedRelation: "accounting_years"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transaction_categories: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          name: string
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          name: string
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          name?: string
+          owner_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          account_id: string
+          accounting_year_id: string | null
+          amount: number
+          category_id: string | null
+          comment: string | null
+          counter_account_id: string | null
+          created_at: string
+          document_id: string | null
+          id: string
+          owner_id: string
+          principal_id: string
+          transaction_date: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          accounting_year_id?: string | null
+          amount: number
+          category_id?: string | null
+          comment?: string | null
+          counter_account_id?: string | null
+          created_at?: string
+          document_id?: string | null
+          id?: string
+          owner_id: string
+          principal_id: string
+          transaction_date?: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          accounting_year_id?: string | null
+          amount?: number
+          category_id?: string | null
+          comment?: string | null
+          counter_account_id?: string | null
+          created_at?: string
+          document_id?: string | null
+          id?: string
+          owner_id?: string
+          principal_id?: string
+          transaction_date?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_accounting_year_id_fkey"
+            columns: ["accounting_year_id"]
+            isOneToOne: false
+            referencedRelation: "accounting_years"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "transaction_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_counter_account_id_fkey"
+            columns: ["counter_account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_principal_id_fkey"
+            columns: ["principal_id"]
+            isOneToOne: false
+            referencedRelation: "principal"
             referencedColumns: ["id"]
           },
         ]
