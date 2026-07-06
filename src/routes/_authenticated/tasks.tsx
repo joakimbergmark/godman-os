@@ -212,12 +212,12 @@ function TasksPage() {
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <div className="relative flex-1 min-w-[200px]">
+        <div className="relative flex-1 min-w-[160px] max-w-[300px]">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input className="pl-8" placeholder="Sök…" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
         <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as typeof statusFilter)}>
-          <SelectTrigger className="w-[150px]"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Alla</SelectItem>
             <SelectItem value="open">Öppna</SelectItem>
@@ -226,7 +226,7 @@ function TasksPage() {
           </SelectContent>
         </Select>
         <Select value={sortKey} onValueChange={(v) => setSortKey(v as typeof sortKey)}>
-          <SelectTrigger className="w-[180px]"><ArrowUpDown className="h-4 w-4 mr-1" /><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-[220px]"><ArrowUpDown className="h-4 w-4 mr-1" /><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="deadline">Sortera på deadline</SelectItem>
             <SelectItem value="priority">Sortera på prioritet</SelectItem>
