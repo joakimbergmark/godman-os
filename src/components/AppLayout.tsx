@@ -25,6 +25,7 @@ import {
   ShieldCheck,
   Clock,
   CalendarDays,
+  Coins,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,7 @@ const items = [
   { title: "Huvudman", url: "/principal", icon: User },
   { title: "Kontakter", url: "/contacts", icon: Users },
   { title: "Aktiviteter", url: "/activities", icon: Activity },
+  { title: "Ekonomi", url: "/economy", icon: Coins },
   { title: "Dokument", url: "/documents", icon: FileText },
   { title: "Uppgifter", url: "/tasks", icon: CheckSquare },
   { title: "Årsöversikt", url: "/year-overview", icon: CalendarDays },
