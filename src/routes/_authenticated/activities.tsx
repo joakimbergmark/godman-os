@@ -83,6 +83,16 @@ function ActivitiesPage() {
     setOpen(true);
   };
 
+  useEffect(() => {
+    if (!highlight || data.length === 0) return;
+    const row = data.find((r) => r.id === highlight);
+    if (row) {
+      openEdit(row);
+      navigate({ to: "/activities", search: {}, replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [highlight, data]);
+
   const save = async () => {
     const parsed = schema.safeParse(form);
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
