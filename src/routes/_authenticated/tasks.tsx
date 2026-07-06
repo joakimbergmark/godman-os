@@ -46,6 +46,7 @@ function TasksPage() {
   const qc = useQueryClient();
   const { highlight } = Route.useSearch();
   const navigate = useNavigate();
+  const { selectedId: yearId, selected: selectedYear } = useAccountingYear();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "open" | "in_progress" | "done">("all");
   const [sortKey, setSortKey] = useState<"deadline" | "priority" | "title" | "created_at">("deadline");
@@ -54,13 +55,18 @@ function TasksPage() {
   const [form, setForm] = useState<Form>(empty);
 
   const { data = [] } = useQuery({
-    queryKey: ["tasks"],
+    queryKey: ["tasks", yearId],
+    enabled: !!yearId,
     queryFn: async () => {
-      const { data, error } = await supabase.from("tasks").select("*");
+      const { data, error } = await supabase
+        .from("tasks")
+        .select("*")
+        .eq("accounting_year_id", yearId!);
       if (error) throw error;
       return data;
     },
   });
+
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
