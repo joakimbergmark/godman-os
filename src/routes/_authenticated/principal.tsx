@@ -164,7 +164,7 @@ function PrincipalPage() {
                   />
                 </Field>
                 <div className="sm:col-span-2">
-                  <Field label="Adress" id="address">
+                  <Field label="Gatuadress" id="address">
                     <Input
                       id="address"
                       value={form.address ?? ""}
@@ -172,6 +172,20 @@ function PrincipalPage() {
                     />
                   </Field>
                 </div>
+                <Field label="Postnummer" id="postal_code">
+                  <Input
+                    id="postal_code"
+                    value={form.postal_code ?? ""}
+                    onChange={(e) => setForm({ ...form, postal_code: e.target.value })}
+                  />
+                </Field>
+                <Field label="Ort" id="city">
+                  <Input
+                    id="city"
+                    value={form.city ?? ""}
+                    onChange={(e) => setForm({ ...form, city: e.target.value })}
+                  />
+                </Field>
                 <div className="sm:col-span-2">
                   <Field label="Anteckningar" id="notes">
                     <Textarea
