@@ -638,13 +638,13 @@ function Transactions({
 }
 
 // ---------- Overview ----------
-function Overview({ yearId }: { yearId: string | null }) {
+function Overview({ viewYearId }: { viewYearId: string | null }) {
   const { data: txs = [] } = useQuery({
-    queryKey: ["transactions", yearId],
-    enabled: !!yearId,
+    queryKey: ["transactions-overview", viewYearId ?? "all"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("transactions").select("*")
-        .eq("accounting_year_id", yearId!);
+      let q = supabase.from("transactions").select("*");
+      if (viewYearId) q = q.eq("accounting_year_id", viewYearId);
+      const { data, error } = await q;
       if (error) throw error;
       return data;
     },
@@ -669,7 +669,6 @@ function Overview({ yearId }: { yearId: string | null }) {
     return { income, expense, net: income - expense, cats };
   }, [txs, categories]);
 
-  if (!yearId) return <Card><CardContent className="py-8 text-center text-sm text-muted-foreground">Välj redovisningsår.</CardContent></Card>;
 
   return (
     <div className="space-y-4">
