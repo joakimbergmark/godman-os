@@ -79,13 +79,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "God man – Enkel administration" },
+      { title: "Care Assistant" },
       {
         name: "description",
         content:
           "Enkel och mobilanpassad administration för god man och förvaltare: huvudman, kontakter, aktiviteter, dokument och uppgifter.",
       },
-      { property: "og:title", content: "God man – Enkel administration" },
+      { property: "og:title", content: "Care Assistant" },
       {
         property: "og:description",
         content:
@@ -93,6 +93,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Care Assistant" },
+      { name: "description", content: "Enkel och mobilanpassad administration för god man och förvaltare: huvudman, kontakter, aktiviteter, dokument, ekonomi och uppgifter." },
+      { property: "og:description", content: "Enkel och mobilanpassad administration för god man och förvaltare: huvudman, kontakter, aktiviteter, dokument, ekonomi och uppgifter." },
+      { name: "twitter:description", content: "Enkel och mobilanpassad administration för god man och förvaltare: huvudman, kontakter, aktiviteter, dokument, ekonomi och uppgifter." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/6231e581-93e2-4cc8-bf3b-fcb2545acbf9" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/6231e581-93e2-4cc8-bf3b-fcb2545acbf9" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
