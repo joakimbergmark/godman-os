@@ -136,6 +136,7 @@ export function GlobalSearch() {
     else if (hit.type === "task") navigate({ to: "/tasks", search: { highlight: hit.id } });
     else if (hit.type === "principal") navigate({ to: "/principal" });
     else if (hit.type === "document") openDocument(hit.storage_path);
+    else if (hit.type === "transaction") navigate({ to: "/economy" });
   };
 
   const total = hits.length;
