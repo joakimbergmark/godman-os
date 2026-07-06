@@ -69,15 +69,51 @@ const ACCOUNT_TYPES = [
 
 // ---------- page ----------
 function EconomyPage() {
-  const { selectedId: yearId, selected: selectedYear, principalId } = useAccountingYear();
+  const { selectedId: yearId, years, principalId } = useAccountingYear();
+  // Local view year: overrides the global year on this page only.
+  // `null` means "Alla år".
+  const [viewYearId, setViewYearId] = useState<string | null>(yearId);
+  // Sync when the global year changes and the user hasn't diverged yet
+  const [touched, setTouched] = useState(false);
+  if (!touched && yearId && viewYearId !== yearId && viewYearId !== null) {
+    // no-op guard; use effect-like sync only when untouched
+  }
+  // Simple sync: whenever global changes and user hasn't picked, follow it
+  useMemo(() => {
+    if (!touched) setViewYearId(yearId);
+  }, [yearId, touched]);
+
+  const viewYear = years.find((y) => y.id === viewYearId) ?? null;
+  const subtitle = viewYearId === null
+    ? "Alla redovisningsår"
+    : viewYear ? `Redovisningsår ${viewYear.year}` : "Inget år valt";
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold">Ekonomi</h1>
-        <p className="text-sm text-muted-foreground">
-          Konton, transaktioner och sammanställning{selectedYear ? ` · Redovisningsår ${selectedYear.year}` : ""}
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold">Ekonomi</h1>
+          <p className="text-sm text-muted-foreground">
+            Konton, transaktioner och sammanställning · {subtitle}
+          </p>
+        </div>
+        {principalId && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">Visar år:</span>
+            <Select
+              value={viewYearId ?? "__all"}
+              onValueChange={(v) => { setTouched(true); setViewYearId(v === "__all" ? null : v); }}
+            >
+              <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all">Alla år</SelectItem>
+                {years.map((y) => (
+                  <SelectItem key={y.id} value={y.id}>Redovisningsår {y.year}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </div>
 
       {!principalId ? (
@@ -91,8 +127,8 @@ function EconomyPage() {
             <TabsTrigger value="transactions">Transaktioner</TabsTrigger>
             <TabsTrigger value="accounts">Konton</TabsTrigger>
           </TabsList>
-          <TabsContent value="overview"><Overview yearId={yearId} /></TabsContent>
-          <TabsContent value="transactions"><Transactions yearId={yearId} principalId={principalId} /></TabsContent>
+          <TabsContent value="overview"><Overview viewYearId={viewYearId} /></TabsContent>
+          <TabsContent value="transactions"><Transactions viewYearId={viewYearId} defaultYearId={yearId} principalId={principalId} /></TabsContent>
           <TabsContent value="accounts"><Accounts principalId={principalId} /></TabsContent>
         </Tabs>
       )}
