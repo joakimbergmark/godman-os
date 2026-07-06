@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -73,13 +73,8 @@ function EconomyPage() {
   // Local view year: overrides the global year on this page only.
   // `null` means "Alla år".
   const [viewYearId, setViewYearId] = useState<string | null>(yearId);
-  // Sync when the global year changes and the user hasn't diverged yet
   const [touched, setTouched] = useState(false);
-  if (!touched && yearId && viewYearId !== yearId && viewYearId !== null) {
-    // no-op guard; use effect-like sync only when untouched
-  }
-  // Simple sync: whenever global changes and user hasn't picked, follow it
-  useMemo(() => {
+  useEffect(() => {
     if (!touched) setViewYearId(yearId);
   }, [yearId, touched]);
 
