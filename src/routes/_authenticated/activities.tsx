@@ -105,6 +105,7 @@ function ActivitiesPage() {
   const save = async () => {
     const parsed = schema.safeParse(form);
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
+    if (!yearId) return toast.error("Välj redovisningsår först");
     const { data: sessionRes } = await supabase.auth.getSession();
     const owner_id = sessionRes.session?.user?.id;
     if (!owner_id) {
@@ -123,13 +124,14 @@ function ActivitiesPage() {
     };
     const res = editing
       ? await supabase.from("activities").update(base).eq("id", editing)
-      : await supabase.from("activities").insert({ owner_id, ...base });
+      : await supabase.from("activities").insert({ owner_id, accounting_year_id: yearId, ...base });
     if (res.error) return toast.error(res.error.message);
     toast.success(editing ? "Sparad" : "Tillagd");
     setOpen(false);
     qc.invalidateQueries({ queryKey: ["activities"] });
     qc.invalidateQueries({ queryKey: ["dashboard"] });
   };
+
 
 
   const del = async (id: string) => {
