@@ -206,6 +206,20 @@ export function GlobalSearch() {
               ))}
             </Group>
           )}
+          {groups.transactions.length > 0 && (
+            <Group title={`Transaktioner (${groups.transactions.length})`} icon={<Wallet className="h-3.5 w-3.5" />}>
+              {groups.transactions.map((h) => h.type === "transaction" && (
+                <ResultRow key={h.id} onClick={() => go(h)}
+                  primary={h.comment || "(ingen kommentar)"}
+                  secondary={[
+                    new Date(h.date).toLocaleDateString("sv-SE"),
+                    new Intl.NumberFormat("sv-SE", { style: "currency", currency: "SEK", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(h.amount),
+                    h.txType === "income" ? "Inkomst" : h.txType === "expense" ? "Utgift" : "Överföring",
+                  ].join(" · ")}
+                />
+              ))}
+            </Group>
+          )}
         </div>
       )}
     </div>
