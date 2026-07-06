@@ -99,7 +99,9 @@ function EconomyPage() {
               value={viewYearId ?? "__all"}
               onValueChange={(v) => { setTouched(true); setViewYearId(v === "__all" ? null : v); }}
             >
-              <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="min-w-[200px] w-auto">
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="__all">Alla år</SelectItem>
                 {years.map((y) => (
