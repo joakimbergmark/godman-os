@@ -1,6 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { Pencil, Plus, Search, Trash2, ArrowUpDown } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/tasks")({
+  validateSearch: (s: Record<string, unknown>) => ({ highlight: typeof s.highlight === "string" ? s.highlight : undefined }),
   component: TasksPage,
 });
 
@@ -41,6 +42,8 @@ const empty: Form = { title: "", description: "", deadline: "", priority: "mediu
 
 function TasksPage() {
   const qc = useQueryClient();
+  const { highlight } = Route.useSearch();
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "open" | "in_progress" | "done">("all");
   const [sortKey, setSortKey] = useState<"deadline" | "priority" | "title" | "created_at">("deadline");
@@ -86,6 +89,16 @@ function TasksPage() {
     });
     setOpen(true);
   };
+
+  useEffect(() => {
+    if (!highlight || data.length === 0) return;
+    const row = data.find((r) => r.id === highlight);
+    if (row) {
+      openEdit(row);
+      navigate({ to: "/tasks", search: {}, replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [highlight, data]);
 
   const save = async () => {
     const parsed = schema.safeParse(form);
