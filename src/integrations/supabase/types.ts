@@ -14,7 +14,204 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      activities: {
+        Row: {
+          activity_date: string
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          owner_id: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          activity_date?: string
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          owner_id: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          activity_date?: string
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          owner_id?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      contacts: {
+        Row: {
+          address: string | null
+          category: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          organization: string | null
+          owner_id: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          category?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          organization?: string | null
+          owner_id: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          category?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          organization?: string | null
+          owner_id?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      documents: {
+        Row: {
+          category: string | null
+          comment: string | null
+          created_at: string
+          document_date: string | null
+          file_name: string | null
+          id: string
+          mime_type: string | null
+          owner_id: string
+          size_bytes: number | null
+          storage_path: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          comment?: string | null
+          created_at?: string
+          document_date?: string | null
+          file_name?: string | null
+          id?: string
+          mime_type?: string | null
+          owner_id: string
+          size_bytes?: number | null
+          storage_path: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          comment?: string | null
+          created_at?: string
+          document_date?: string | null
+          file_name?: string | null
+          id?: string
+          mime_type?: string | null
+          owner_id?: string
+          size_bytes?: number | null
+          storage_path?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      principal: {
+        Row: {
+          address: string | null
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          notes: string | null
+          owner_id: string
+          personal_number: string | null
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          notes?: string | null
+          owner_id: string
+          personal_number?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          notes?: string | null
+          owner_id?: string
+          personal_number?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      tasks: {
+        Row: {
+          created_at: string
+          deadline: string | null
+          description: string | null
+          id: string
+          owner_id: string
+          priority: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deadline?: string | null
+          description?: string | null
+          id?: string
+          owner_id: string
+          priority?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deadline?: string | null
+          description?: string | null
+          id?: string
+          owner_id?: string
+          priority?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
