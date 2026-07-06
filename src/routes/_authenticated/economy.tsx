@@ -408,7 +408,8 @@ function Transactions({
   const save = async () => {
     const parsed = txSchema.safeParse(form);
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
-    if (!yearId) return toast.error("Välj redovisningsår först");
+    const targetYearId = viewYearId ?? defaultYearId;
+    if (!targetYearId) return toast.error("Välj redovisningsår först");
     if (parsed.data.type === "transfer" && !parsed.data.counter_account_id)
       return toast.error("Välj motkonto för överföring");
     const { data: s } = await supabase.auth.getSession();
@@ -426,7 +427,7 @@ function Transactions({
     };
     const res = editing
       ? await supabase.from("transactions").update(base).eq("id", editing)
-      : await supabase.from("transactions").insert({ owner_id, principal_id: principalId, accounting_year_id: yearId, ...base });
+      : await supabase.from("transactions").insert({ owner_id, principal_id: principalId, accounting_year_id: targetYearId, ...base });
     if (res.error) return toast.error(res.error.message);
     toast.success(editing ? "Sparad" : "Registrerad");
     setOpen(false);
