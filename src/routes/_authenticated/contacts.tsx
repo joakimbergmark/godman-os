@@ -88,8 +88,11 @@ function ContactsPage() {
       phone: row.phone ?? "",
       email: row.email ?? "",
       address: row.address ?? "",
+      postal_code: row.postal_code ?? "",
+      city: row.city ?? "",
       notes: row.notes ?? "",
     });
+
     setOpen(true);
   };
 
