@@ -54,6 +54,7 @@ export type Database = {
         Row: {
           address: string | null
           category: string | null
+          city: string | null
           created_at: string
           email: string | null
           id: string
@@ -62,11 +63,13 @@ export type Database = {
           organization: string | null
           owner_id: string
           phone: string | null
+          postal_code: string | null
           updated_at: string
         }
         Insert: {
           address?: string | null
           category?: string | null
+          city?: string | null
           created_at?: string
           email?: string | null
           id?: string
@@ -75,11 +78,13 @@ export type Database = {
           organization?: string | null
           owner_id: string
           phone?: string | null
+          postal_code?: string | null
           updated_at?: string
         }
         Update: {
           address?: string | null
           category?: string | null
+          city?: string | null
           created_at?: string
           email?: string | null
           id?: string
@@ -88,6 +93,7 @@ export type Database = {
           organization?: string | null
           owner_id?: string
           phone?: string | null
+          postal_code?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -140,6 +146,7 @@ export type Database = {
       principal: {
         Row: {
           address: string | null
+          city: string | null
           created_at: string
           email: string | null
           full_name: string
@@ -148,10 +155,12 @@ export type Database = {
           owner_id: string
           personal_number: string | null
           phone: string | null
+          postal_code: string | null
           updated_at: string
         }
         Insert: {
           address?: string | null
+          city?: string | null
           created_at?: string
           email?: string | null
           full_name: string
@@ -160,10 +169,12 @@ export type Database = {
           owner_id: string
           personal_number?: string | null
           phone?: string | null
+          postal_code?: string | null
           updated_at?: string
         }
         Update: {
           address?: string | null
+          city?: string | null
           created_at?: string
           email?: string | null
           full_name?: string
@@ -172,6 +183,7 @@ export type Database = {
           owner_id?: string
           personal_number?: string | null
           phone?: string | null
+          postal_code?: string | null
           updated_at?: string
         }
         Relationships: []
