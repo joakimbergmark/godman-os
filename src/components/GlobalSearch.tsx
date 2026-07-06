@@ -127,18 +127,18 @@ export function GlobalSearch() {
   const showPanel = open && debounced.trim().length >= 2;
 
   return (
-    <div ref={wrapRef} className="relative w-full max-w-md">
+    <div ref={wrapRef} className="relative w-full max-w-lg">
       <div className="relative">
-        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
           ref={inputRef}
-          className="pl-8 h-9"
+          className="pl-10 h-10 text-base"
           placeholder="Sök i allt… (Ctrl/Cmd + K)"
           value={q}
           onChange={(e) => { setQ(e.target.value); setOpen(true); }}
           onFocus={() => setOpen(true)}
         />
-        {loading && <Loader2 className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />}
+        {loading && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 animate-spin text-muted-foreground" />}
       </div>
 
       {showPanel && (
