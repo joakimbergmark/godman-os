@@ -35,6 +35,8 @@ const empty: Meta = { title: "", category: "", document_date: "", comment: "" };
 
 function DocumentsPage() {
   const qc = useQueryClient();
+  const navigate = useNavigate();
+
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<"created_at" | "title" | "category" | "document_date">("created_at");
   const [open, setOpen] = useState(false);
