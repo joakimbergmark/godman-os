@@ -18,6 +18,8 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Pencil, Plus, Search, Trash2, ArrowUpDown } from "lucide-react";
+import { useAccountingYear } from "@/lib/accounting-year";
+
 
 export const Route = createFileRoute("/_authenticated/tasks")({
   validateSearch: (s: Record<string, unknown>) => ({ highlight: typeof s.highlight === "string" ? s.highlight : undefined }),
@@ -44,6 +46,7 @@ function TasksPage() {
   const qc = useQueryClient();
   const { highlight } = Route.useSearch();
   const navigate = useNavigate();
+  const { selectedId: yearId, selected: selectedYear } = useAccountingYear();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "open" | "in_progress" | "done">("all");
   const [sortKey, setSortKey] = useState<"deadline" | "priority" | "title" | "created_at">("deadline");
@@ -52,13 +55,18 @@ function TasksPage() {
   const [form, setForm] = useState<Form>(empty);
 
   const { data = [] } = useQuery({
-    queryKey: ["tasks"],
+    queryKey: ["tasks", yearId],
+    enabled: !!yearId,
     queryFn: async () => {
-      const { data, error } = await supabase.from("tasks").select("*");
+      const { data, error } = await supabase
+        .from("tasks")
+        .select("*")
+        .eq("accounting_year_id", yearId!);
       if (error) throw error;
       return data;
     },
   });
+
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -103,6 +111,7 @@ function TasksPage() {
   const save = async () => {
     const parsed = schema.safeParse(form);
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
+    if (!yearId) return toast.error("Välj redovisningsår först");
     const { data: sessionRes } = await supabase.auth.getSession();
     const owner_id = sessionRes.session?.user?.id;
     if (!owner_id) {
@@ -119,13 +128,14 @@ function TasksPage() {
     };
     const res = editing
       ? await supabase.from("tasks").update(base).eq("id", editing)
-      : await supabase.from("tasks").insert({ owner_id, ...base });
+      : await supabase.from("tasks").insert({ owner_id, accounting_year_id: yearId, ...base });
     if (res.error) return toast.error(res.error.message);
     toast.success(editing ? "Sparad" : "Tillagd");
     setOpen(false);
     qc.invalidateQueries({ queryKey: ["tasks"] });
     qc.invalidateQueries({ queryKey: ["dashboard"] });
   };
+
 
 
   const del = async (id: string) => {
@@ -149,7 +159,10 @@ function TasksPage() {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h1 className="text-2xl font-semibold">Uppgifter</h1>
-          <p className="text-sm text-muted-foreground">Att-göra-lista</p>
+          <p className="text-sm text-muted-foreground">
+            Att-göra-lista{selectedYear ? ` · Redovisningsår ${selectedYear.year}` : ""}
+          </p>
+
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>

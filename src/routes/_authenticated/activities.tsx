@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Pencil, Plus, Search, Trash2, ArrowUpDown } from "lucide-react";
+import { useAccountingYear } from "@/lib/accounting-year";
+
 
 export const Route = createFileRoute("/_authenticated/activities")({
   validateSearch: (s: Record<string, unknown>) => ({ highlight: typeof s.highlight === "string" ? s.highlight : undefined }),
@@ -40,6 +42,7 @@ function ActivitiesPage() {
   const qc = useQueryClient();
   const { highlight } = Route.useSearch();
   const navigate = useNavigate();
+  const { selectedId: yearId, selected: selectedYear } = useAccountingYear();
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<"activity_date" | "title" | "category">("activity_date");
   const [open, setOpen] = useState(false);
@@ -47,13 +50,19 @@ function ActivitiesPage() {
   const [form, setForm] = useState<Form>(empty);
 
   const { data = [] } = useQuery({
-    queryKey: ["activities"],
+    queryKey: ["activities", yearId],
+    enabled: !!yearId,
     queryFn: async () => {
-      const { data, error } = await supabase.from("activities").select("*").order("activity_date", { ascending: false });
+      const { data, error } = await supabase
+        .from("activities")
+        .select("*")
+        .eq("accounting_year_id", yearId!)
+        .order("activity_date", { ascending: false });
       if (error) throw error;
       return data;
     },
   });
+
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -96,6 +105,7 @@ function ActivitiesPage() {
   const save = async () => {
     const parsed = schema.safeParse(form);
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
+    if (!yearId) return toast.error("Välj redovisningsår först");
     const { data: sessionRes } = await supabase.auth.getSession();
     const owner_id = sessionRes.session?.user?.id;
     if (!owner_id) {
@@ -114,13 +124,14 @@ function ActivitiesPage() {
     };
     const res = editing
       ? await supabase.from("activities").update(base).eq("id", editing)
-      : await supabase.from("activities").insert({ owner_id, ...base });
+      : await supabase.from("activities").insert({ owner_id, accounting_year_id: yearId, ...base });
     if (res.error) return toast.error(res.error.message);
     toast.success(editing ? "Sparad" : "Tillagd");
     setOpen(false);
     qc.invalidateQueries({ queryKey: ["activities"] });
     qc.invalidateQueries({ queryKey: ["dashboard"] });
   };
+
 
 
   const del = async (id: string) => {
@@ -137,8 +148,11 @@ function ActivitiesPage() {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h1 className="text-2xl font-semibold">Aktiviteter</h1>
-          <p className="text-sm text-muted-foreground">Händelselogg för uppdraget</p>
+          <p className="text-sm text-muted-foreground">
+            Händelselogg för uppdraget{selectedYear ? ` · Redovisningsår ${selectedYear.year}` : ""}
+          </p>
         </div>
+
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button onClick={openNew}><Plus className="h-4 w-4 mr-1" /> Ny aktivitet</Button>

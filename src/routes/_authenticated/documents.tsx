@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Download, Pencil, Plus, Search, Trash2, ArrowUpDown, FileText } from "lucide-react";
+import { useAccountingYear } from "@/lib/accounting-year";
+
 
 export const Route = createFileRoute("/_authenticated/documents")({
   component: DocumentsPage,
@@ -29,13 +31,16 @@ const metaSchema = z.object({
   category: z.string().max(60).optional().or(z.literal("")),
   document_date: z.string().optional().or(z.literal("")),
   comment: z.string().max(2000).optional().or(z.literal("")),
+  year_scope: z.enum(["current", "general"]),
 });
 type Meta = z.infer<typeof metaSchema>;
-const empty: Meta = { title: "", category: "", document_date: "", comment: "" };
+const empty: Meta = { title: "", category: "", document_date: "", comment: "", year_scope: "current" };
+
 
 function DocumentsPage() {
   const qc = useQueryClient();
   const navigate = useNavigate();
+  const { selectedId: yearId, selected: selectedYear } = useAccountingYear();
 
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<"created_at" | "title" | "category" | "document_date">("created_at");
@@ -47,13 +52,20 @@ function DocumentsPage() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const { data = [] } = useQuery({
-    queryKey: ["documents"],
+    queryKey: ["documents", yearId],
+    enabled: !!yearId,
     queryFn: async () => {
-      const { data, error } = await supabase.from("documents").select("*").order("created_at", { ascending: false });
+      // Show documents for selected year OR general (accounting_year_id is null)
+      const { data, error } = await supabase
+        .from("documents")
+        .select("*")
+        .or(`accounting_year_id.eq.${yearId},accounting_year_id.is.null`)
+        .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
     },
   });
+
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -77,7 +89,9 @@ function DocumentsPage() {
       category: row.category ?? "",
       document_date: row.document_date ?? "",
       comment: row.comment ?? "",
+      year_scope: row.accounting_year_id ? "current" : "general",
     });
+
     setFile(null);
     setOpen(true);
   };
@@ -96,11 +110,13 @@ function DocumentsPage() {
 
     setUploading(true);
     try {
+      const accounting_year_id = parsed.data.year_scope === "general" ? null : yearId;
       const base = {
         title: parsed.data.title,
         category: parsed.data.category || null,
         document_date: parsed.data.document_date || null,
         comment: parsed.data.comment || null,
+        accounting_year_id,
       };
 
       if (editing) {
@@ -117,6 +133,7 @@ function DocumentsPage() {
       } else {
         if (!file) throw new Error("Välj en fil att ladda upp");
         if (file.size > 20 * 1024 * 1024) throw new Error("Max 20 MB per fil");
+        if (parsed.data.year_scope === "current" && !yearId) throw new Error("Välj redovisningsår först");
         const path = `${owner_id}/${crypto.randomUUID()}-${file.name}`;
         const up = await supabase.storage.from("documents").upload(path, file);
         if (up.error) throw up.error;
@@ -126,6 +143,7 @@ function DocumentsPage() {
         });
         if (error) throw error;
       }
+
       toast.success(editing ? "Sparat" : "Uppladdad");
       setOpen(false);
       qc.invalidateQueries({ queryKey: ["documents"] });
@@ -158,8 +176,11 @@ function DocumentsPage() {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h1 className="text-2xl font-semibold">Dokument</h1>
-          <p className="text-sm text-muted-foreground">Ladda upp och organisera dokument</p>
+          <p className="text-sm text-muted-foreground">
+            Ladda upp och organisera dokument{selectedYear ? ` · Redovisningsår ${selectedYear.year} + generella` : ""}
+          </p>
         </div>
+
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button onClick={openNew}><Plus className="h-4 w-4 mr-1" /> Nytt dokument</Button>
@@ -183,9 +204,25 @@ function DocumentsPage() {
                 <Input type="date" value={form.document_date ?? ""} onChange={(e) => setForm({ ...form, document_date: e.target.value })} />
               </div>
               <div className="space-y-1.5 sm:col-span-2">
+                <Label>Redovisningsår</Label>
+                <Select
+                  value={form.year_scope}
+                  onValueChange={(v) => setForm({ ...form, year_scope: v as "current" | "general" })}
+                >
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="current">
+                      Bundet till {selectedYear ? selectedYear.year : "aktuellt år"}
+                    </SelectItem>
+                    <SelectItem value="general">Generellt (visas alla år)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5 sm:col-span-2">
                 <Label>Kommentar</Label>
                 <Textarea rows={3} value={form.comment ?? ""} onChange={(e) => setForm({ ...form, comment: e.target.value })} />
               </div>
+
               <div className="space-y-1.5 sm:col-span-2">
                 <Label>Fil {editing && "(valfritt – ersätter befintlig)"}</Label>
                 <Input ref={fileRef} type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
@@ -230,7 +267,9 @@ function DocumentsPage() {
                   <div className="flex flex-wrap items-center gap-2">
                     <div className="font-semibold truncate">{d.title}</div>
                     {d.category && <Badge variant="secondary">{d.category}</Badge>}
+                    {!d.accounting_year_id && <Badge variant="outline" className="text-[10px]">Generellt</Badge>}
                   </div>
+
                   <div className="text-xs text-muted-foreground mt-0.5">
                     {d.file_name} · uppladdad {new Date(d.created_at).toLocaleDateString("sv-SE")}
                     {d.document_date && ` · datum ${new Date(d.document_date).toLocaleDateString("sv-SE")}`}
