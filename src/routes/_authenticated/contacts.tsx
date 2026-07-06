@@ -182,7 +182,7 @@ function ContactsPage() {
                 <div className="mt-1 text-sm text-muted-foreground flex flex-wrap gap-x-4 gap-y-0.5">
                   {c.phone && <span>📞 {c.phone}</span>}
                   {c.email && <span>✉️ {c.email}</span>}
-                  {c.address && <span>📍 {c.address}</span>}
+                  {(c.address || c.postal_code || c.city) && <span>📍 {[c.address, [c.postal_code, c.city].filter(Boolean).join(" ")].filter(Boolean).join(", ")}</span>}
                 </div>
                 {c.notes && <p className="mt-2 text-sm whitespace-pre-wrap">{c.notes}</p>}
               </div>
