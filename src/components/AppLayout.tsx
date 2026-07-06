@@ -24,12 +24,15 @@ import {
   LogOut,
   ShieldCheck,
   Clock,
+  CalendarDays,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { GlobalSearch } from "@/components/GlobalSearch";
+import { AccountingYearProvider } from "@/lib/accounting-year";
+import { AccountingYearSelector } from "@/components/AccountingYearSelector";
 
 const items = [
   { title: "Översikt", url: "/dashboard", icon: LayoutDashboard },
@@ -39,7 +42,9 @@ const items = [
   { title: "Aktiviteter", url: "/activities", icon: Activity },
   { title: "Dokument", url: "/documents", icon: FileText },
   { title: "Uppgifter", url: "/tasks", icon: CheckSquare },
+  { title: "Årsöversikt", url: "/year-overview", icon: CalendarDays },
 ] as const;
+
 
 function AppSidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
