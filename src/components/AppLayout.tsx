@@ -23,14 +23,17 @@ import {
   CheckSquare,
   LogOut,
   ShieldCheck,
+  Clock,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { GlobalSearch } from "@/components/GlobalSearch";
 
 const items = [
   { title: "Översikt", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Tidslinje", url: "/timeline", icon: Clock },
   { title: "Huvudman", url: "/principal", icon: User },
   { title: "Kontakter", url: "/contacts", icon: Users },
   { title: "Aktiviteter", url: "/activities", icon: Activity },
@@ -104,11 +107,14 @@ export function AppLayout({ children }: { children: ReactNode }) {
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-14 border-b border-border flex items-center gap-2 px-3 sticky top-0 bg-background/80 backdrop-blur z-10">
+          <header className="h-14 border-b border-border flex items-center gap-3 px-3 sticky top-0 bg-background/80 backdrop-blur z-10">
             <SidebarTrigger />
-            <h1 className="text-sm font-medium text-muted-foreground truncate">
+            <h1 className="text-sm font-medium text-muted-foreground truncate hidden sm:block min-w-[80px]">
               {current?.title ?? ""}
             </h1>
+            <div className="flex-1 flex justify-center">
+              <GlobalSearch />
+            </div>
           </header>
           <main className="flex-1 p-4 sm:p-6 max-w-6xl w-full mx-auto">{children}</main>
         </div>
