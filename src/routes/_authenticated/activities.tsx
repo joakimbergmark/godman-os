@@ -148,8 +148,11 @@ function ActivitiesPage() {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h1 className="text-2xl font-semibold">Aktiviteter</h1>
-          <p className="text-sm text-muted-foreground">Händelselogg för uppdraget</p>
+          <p className="text-sm text-muted-foreground">
+            Händelselogg för uppdraget{selectedYear ? ` · Redovisningsår ${selectedYear.year}` : ""}
+          </p>
         </div>
+
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button onClick={openNew}><Plus className="h-4 w-4 mr-1" /> Ny aktivitet</Button>
