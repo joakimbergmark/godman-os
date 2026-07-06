@@ -117,6 +117,7 @@ export function GlobalSearch() {
       documents: hits.filter((h) => h.type === "document"),
       tasks: hits.filter((h) => h.type === "task"),
       principal: hits.filter((h) => h.type === "principal"),
+      transactions: hits.filter((h) => h.type === "transaction"),
     };
   }, [hits]);
 
