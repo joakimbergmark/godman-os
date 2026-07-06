@@ -231,8 +231,16 @@ function ContactDialog({
           <Input type="email" value={form.email ?? ""} onChange={(e) => setForm({ ...form, email: e.target.value })} />
         </div>
         <div className="space-y-1.5 sm:col-span-2">
-          <Label>Adress</Label>
+          <Label>Gatuadress</Label>
           <Input value={form.address ?? ""} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+        </div>
+        <div className="space-y-1.5">
+          <Label>Postnummer</Label>
+          <Input value={form.postal_code ?? ""} onChange={(e) => setForm({ ...form, postal_code: e.target.value })} />
+        </div>
+        <div className="space-y-1.5">
+          <Label>Ort</Label>
+          <Input value={form.city ?? ""} onChange={(e) => setForm({ ...form, city: e.target.value })} />
         </div>
         <div className="space-y-1.5 sm:col-span-2">
           <Label>Anteckningar</Label>
