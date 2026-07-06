@@ -40,11 +40,14 @@ const schema = z.object({
   phone: z.string().max(30).optional().or(z.literal("")),
   email: z.string().trim().email("Ogiltig e-post").max(255).optional().or(z.literal("")),
   address: z.string().max(200).optional().or(z.literal("")),
+  postal_code: z.string().max(20).optional().or(z.literal("")),
+  city: z.string().max(120).optional().or(z.literal("")),
   notes: z.string().max(2000).optional().or(z.literal("")),
 });
 
 type Form = z.infer<typeof schema>;
-const empty: Form = { name: "", category: "", organization: "", phone: "", email: "", address: "", notes: "" };
+const empty: Form = { name: "", category: "", organization: "", phone: "", email: "", address: "", postal_code: "", city: "", notes: "" };
+
 
 function ContactsPage() {
   const qc = useQueryClient();
