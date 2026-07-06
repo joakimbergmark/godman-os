@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { Search, Loader2, Activity, FileText, Users, CheckSquare, User } from "lucide-react";
+import { Search, Loader2, Activity, FileText, Users, CheckSquare, User, Wallet } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -10,7 +10,9 @@ type Hit =
   | { type: "document"; id: string; title: string; category?: string | null; date?: string | null; storage_path: string }
   | { type: "contact"; id: string; name: string; organization?: string | null }
   | { type: "task"; id: string; title: string; status: string }
-  | { type: "principal"; id: string; full_name: string };
+  | { type: "principal"; id: string; full_name: string }
+  | { type: "transaction"; id: string; comment: string; amount: number; txType: string; date: string };
+
 
 const escapeIlike = (q: string) => q.replace(/[%_,()]/g, " ").trim();
 
@@ -20,7 +22,13 @@ async function runSearch(raw: string): Promise<Hit[]> {
   const like = `%${q}%`;
   const limit = 10;
 
-  const [act, doc, con, tsk, pri] = await Promise.all([
+  const numeric = Number(q.replace(",", "."));
+  const isNum = !isNaN(numeric) && q.match(/^[0-9.,]+$/);
+  const txFilter = isNum
+    ? `comment.ilike.${like},amount.eq.${numeric}`
+    : `comment.ilike.${like}`;
+
+  const [act, doc, con, tsk, pri, trx] = await Promise.all([
     supabase.from("activities")
       .select("id,title,description,activity_date")
       .or(`title.ilike.${like},description.ilike.${like},category.ilike.${like}`)
@@ -41,7 +49,12 @@ async function runSearch(raw: string): Promise<Hit[]> {
       .select("id,full_name,personal_number,email,phone,address,city,notes")
       .or(`full_name.ilike.${like},personal_number.ilike.${like},email.ilike.${like},phone.ilike.${like},address.ilike.${like},city.ilike.${like},notes.ilike.${like}`)
       .limit(limit),
+    supabase.from("transactions")
+      .select("id,comment,amount,type,transaction_date")
+      .or(txFilter)
+      .limit(limit),
   ]);
+
 
   const hits: Hit[] = [];
   (act.data ?? []).forEach((r) => hits.push({ type: "activity", id: r.id, title: r.title, description: r.description, date: r.activity_date }));
@@ -49,6 +62,7 @@ async function runSearch(raw: string): Promise<Hit[]> {
   (con.data ?? []).forEach((r) => hits.push({ type: "contact", id: r.id, name: r.name, organization: r.organization }));
   (tsk.data ?? []).forEach((r) => hits.push({ type: "task", id: r.id, title: r.title, status: r.status }));
   (pri.data ?? []).forEach((r) => hits.push({ type: "principal", id: r.id, full_name: r.full_name }));
+  (trx.data ?? []).forEach((r) => hits.push({ type: "transaction", id: r.id, comment: r.comment ?? "", amount: Number(r.amount), txType: r.type, date: r.transaction_date }));
   return hits;
 }
 
@@ -103,6 +117,7 @@ export function GlobalSearch() {
       documents: hits.filter((h) => h.type === "document"),
       tasks: hits.filter((h) => h.type === "task"),
       principal: hits.filter((h) => h.type === "principal"),
+      transactions: hits.filter((h) => h.type === "transaction"),
     };
   }, [hits]);
 
@@ -121,6 +136,7 @@ export function GlobalSearch() {
     else if (hit.type === "task") navigate({ to: "/tasks", search: { highlight: hit.id } });
     else if (hit.type === "principal") navigate({ to: "/principal" });
     else if (hit.type === "document") openDocument(hit.storage_path);
+    else if (hit.type === "transaction") navigate({ to: "/economy" });
   };
 
   const total = hits.length;
@@ -187,6 +203,20 @@ export function GlobalSearch() {
             <Group title={`Huvudman (${groups.principal.length})`} icon={<User className="h-3.5 w-3.5" />}>
               {groups.principal.map((h) => h.type === "principal" && (
                 <ResultRow key={h.id} onClick={() => go(h)} primary={h.full_name} secondary="" />
+              ))}
+            </Group>
+          )}
+          {groups.transactions.length > 0 && (
+            <Group title={`Transaktioner (${groups.transactions.length})`} icon={<Wallet className="h-3.5 w-3.5" />}>
+              {groups.transactions.map((h) => h.type === "transaction" && (
+                <ResultRow key={h.id} onClick={() => go(h)}
+                  primary={h.comment || "(ingen kommentar)"}
+                  secondary={[
+                    new Date(h.date).toLocaleDateString("sv-SE"),
+                    new Intl.NumberFormat("sv-SE", { style: "currency", currency: "SEK", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(h.amount),
+                    h.txType === "income" ? "Inkomst" : h.txType === "expense" ? "Utgift" : "Överföring",
+                  ].join(" · ")}
+                />
               ))}
             </Group>
           )}
