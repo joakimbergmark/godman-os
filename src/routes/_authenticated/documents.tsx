@@ -81,7 +81,9 @@ function DocumentsPage() {
       category: row.category ?? "",
       document_date: row.document_date ?? "",
       comment: row.comment ?? "",
+      year_scope: row.accounting_year_id ? "current" : "general",
     });
+
     setFile(null);
     setOpen(true);
   };
