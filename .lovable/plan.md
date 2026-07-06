@@ -1,57 +1,31 @@
+Registrera 10 transaktioner från kontoutdraget på konto **Allkonto 6751-806325011** för redovisningsår 2026.
 
-## Problem
+## Transaktioner som läggs in
 
-När du klickar "Spara" på en befintlig aktivitet visas toasten **"Ej inloggad"** trots att du är inloggad. Samma mönster finns i flera formulär.
+Datum använder `Transaktionsdatum` från utdraget. Belopp lagras som positivt tal; typ styr tecknet.
 
-## Rotorsak
+| Datum | Text (kommentar) | Typ | Belopp |
+|---|---|---|---|
+| 2026-03-08 | SE0110 NORMAL | expense | 12,00 |
+| 2026-03-01 | MCDHELSINGBORG | expense | 73,00 |
+| 2026-03-01 | Oresundslinjen | expense | 59,00 |
+| 2026-02-26 | Månadspeng | income | 300,00 |
+| 2026-02-15 | SE01011 TZ-SHO | expense | 10,00 |
+| 2026-02-15 | MCDHELSINGBORG | expense | 74,00 |
+| 2026-02-08 | MCDHELSINGBORG | expense | 78,00 |
+| 2026-01-24 | MCDMALMOHYLLIE | expense | 53,00 |
+| 2026-01-26 | Månadspeng | income | 300,00 |
+| 2026-01-10 | Överf Mobil | expense | 500,00 |
 
-I `src/routes/_authenticated/activities.tsx` (rad 96–114) gör `save()` följande vid varje sparning:
+Netto: +600 inkomst − 932 utgift = **−332,00 kr** för perioden.
 
-```ts
-const { data: userRes } = await supabase.auth.getUser();
-const owner_id = userRes.user?.id;
-if (!owner_id) return toast.error("Ej inloggad");
-```
+## Detaljer
 
-Två problem:
+- `account_id` = Allkonto (6751-806325011)
+- `principal_id` och `owner_id` = huvudmannens/dina ID
+- `accounting_year_id` = 2026
+- `category_id` = null (inga kategorier finns ännu — kan sättas senare)
+- `comment` = texten från utdraget
+- "Överf Mobil" registreras som `expense` eftersom det bara finns ett konto i systemet (går att ändra till `transfer` senare när mottagarkontot finns)
 
-1. **`getUser()` gör ett nätverksanrop** till Supabase Auth vid varje spar-klick. Om anropet returnerar fel eller är långsamt/avbrutet (nätverkshick, token-refresh pågår, dialog stängs och avbryter fetch, etc.) tolkas det som "inte inloggad" – trots giltig session. Auth-loggarna visar återkommande `/user`-anrop; ett enda som misslyckas ger detta fel.
-2. **`owner_id` skickas med i UPDATE-payloaden** även vid redigering. Det behövs inte – RLS-policyn `auth.uid() = owner_id` skyddar redan raden, och `owner_id` sattes vid insert. Att skicka med den vid update ökar bara ytan för fel.
-
-Samma mönster finns även i `contacts.tsx`, `tasks.tsx`, `principal.tsx`, `documents.tsx` – alla har samma potentiella brist.
-
-## Åtgärd
-
-### 1. Använd cached session istället för getUser() vid mutation
-
-Ersätt `supabase.auth.getUser()` med `supabase.auth.getSession()` som läser cachad session lokalt utan nätverksanrop. Snabbare, mer robust, samma säkerhet (RLS validerar bearer-token på servern).
-
-### 2. Skicka inte `owner_id` vid UPDATE
-
-Vid redigering: skicka bara de faktiskt ändrade fälten. `owner_id` sätts endast vid INSERT.
-
-```ts
-const res = editing
-  ? await supabase.from("activities").update({
-      activity_date, title, description, category, tags,
-    }).eq("id", editing)
-  : await supabase.from("activities").insert({ owner_id, ...rest });
-```
-
-### 3. Applicera samma mönster på övriga formulär
-
-Uppdatera `contacts.tsx`, `tasks.tsx`, `principal.tsx`, `documents.tsx` med samma två fix så att felet inte kan uppstå någon annanstans.
-
-### 4. Om sessionen faktiskt saknas → redirect till /auth
-
-Istället för bara en toast: om `getSession()` returnerar `null` betyder det att gate:n missat något – redirect till `/auth` med `navigate({ to: "/auth" })` så användaren kan logga in igen.
-
-## Filer som ändras
-
-- `src/routes/_authenticated/activities.tsx`
-- `src/routes/_authenticated/contacts.tsx`
-- `src/routes/_authenticated/tasks.tsx`
-- `src/routes/_authenticated/principal.tsx`
-- `src/routes/_authenticated/documents.tsx`
-
-Inga databasändringar behövs – RLS-policyerna är redan korrekta.
+Körs som en `INSERT` mot `transactions` via insert-verktyget — inga schema- eller kodändringar.
