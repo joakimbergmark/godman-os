@@ -85,9 +85,14 @@ function DocumentsPage() {
   const save = async () => {
     const parsed = metaSchema.safeParse(form);
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
-    const { data: userRes } = await supabase.auth.getUser();
-    const owner_id = userRes.user?.id;
-    if (!owner_id) return toast.error("Ej inloggad");
+    const { data: sessionRes } = await supabase.auth.getSession();
+    const owner_id = sessionRes.session?.user?.id;
+    if (!owner_id) {
+      toast.error("Sessionen har gått ut, logga in igen");
+      navigate({ to: "/auth" });
+      return;
+    }
+
 
     setUploading(true);
     try {
