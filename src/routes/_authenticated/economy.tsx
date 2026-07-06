@@ -483,6 +483,15 @@ function Transactions({
               {categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.name} ({c.kind === "income" ? "inkomst" : "utgift"})</SelectItem>)}
             </SelectContent>
           </Select>
+          <Select value={sortKey} onValueChange={(v) => setSortKey(v as typeof sortKey)}>
+            <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="date_desc">Datum, nyast först</SelectItem>
+              <SelectItem value="date_asc">Datum, äldst först</SelectItem>
+              <SelectItem value="amount_desc">Belopp, störst först</SelectItem>
+              <SelectItem value="amount_asc">Belopp, minst först</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
