@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -69,15 +69,46 @@ const ACCOUNT_TYPES = [
 
 // ---------- page ----------
 function EconomyPage() {
-  const { selectedId: yearId, selected: selectedYear, principalId } = useAccountingYear();
+  const { selectedId: yearId, years, principalId } = useAccountingYear();
+  // Local view year: overrides the global year on this page only.
+  // `null` means "Alla år".
+  const [viewYearId, setViewYearId] = useState<string | null>(yearId);
+  const [touched, setTouched] = useState(false);
+  useEffect(() => {
+    if (!touched) setViewYearId(yearId);
+  }, [yearId, touched]);
+
+  const viewYear = years.find((y) => y.id === viewYearId) ?? null;
+  const subtitle = viewYearId === null
+    ? "Alla redovisningsår"
+    : viewYear ? `Redovisningsår ${viewYear.year}` : "Inget år valt";
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold">Ekonomi</h1>
-        <p className="text-sm text-muted-foreground">
-          Konton, transaktioner och sammanställning{selectedYear ? ` · Redovisningsår ${selectedYear.year}` : ""}
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold">Ekonomi</h1>
+          <p className="text-sm text-muted-foreground">
+            Konton, transaktioner och sammanställning · {subtitle}
+          </p>
+        </div>
+        {principalId && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">Visar år:</span>
+            <Select
+              value={viewYearId ?? "__all"}
+              onValueChange={(v) => { setTouched(true); setViewYearId(v === "__all" ? null : v); }}
+            >
+              <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all">Alla år</SelectItem>
+                {years.map((y) => (
+                  <SelectItem key={y.id} value={y.id}>Redovisningsår {y.year}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </div>
 
       {!principalId ? (
@@ -91,8 +122,8 @@ function EconomyPage() {
             <TabsTrigger value="transactions">Transaktioner</TabsTrigger>
             <TabsTrigger value="accounts">Konton</TabsTrigger>
           </TabsList>
-          <TabsContent value="overview"><Overview yearId={yearId} /></TabsContent>
-          <TabsContent value="transactions"><Transactions yearId={yearId} principalId={principalId} /></TabsContent>
+          <TabsContent value="overview"><Overview viewYearId={viewYearId} /></TabsContent>
+          <TabsContent value="transactions"><Transactions viewYearId={viewYearId} defaultYearId={yearId} principalId={principalId} /></TabsContent>
           <TabsContent value="accounts"><Accounts principalId={principalId} /></TabsContent>
         </Tabs>
       )}
@@ -287,7 +318,13 @@ function useCategories() {
 }
 
 // ---------- Transactions ----------
-function Transactions({ yearId, principalId }: { yearId: string | null; principalId: string }) {
+function Transactions({
+  viewYearId, defaultYearId, principalId,
+}: {
+  viewYearId: string | null;
+  defaultYearId: string | null;
+  principalId: string;
+}) {
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -295,6 +332,7 @@ function Transactions({ yearId, principalId }: { yearId: string | null; principa
   const [form, setForm] = useState<TxForm>(emptyTx);
   const [filterType, setFilterType] = useState<"all" | "income" | "expense" | "transfer">("all");
   const [filterCategory, setFilterCategory] = useState<string>("all");
+  const [sortKey, setSortKey] = useState<"date_desc" | "date_asc" | "amount_desc" | "amount_asc">("date_desc");
   const [newCatOpen, setNewCatOpen] = useState(false);
   const [newCat, setNewCat] = useState<{ name: string; kind: "income" | "expense" }>({ name: "", kind: "expense" });
 
@@ -318,23 +356,30 @@ function Transactions({ yearId, principalId }: { yearId: string | null; principa
   });
 
   const { data: txs = [] } = useQuery({
-    queryKey: ["transactions", yearId],
-    enabled: !!yearId,
+    queryKey: ["transactions", viewYearId ?? "all", principalId],
     queryFn: async () => {
-      const { data, error } = await supabase.from("transactions").select("*")
-        .eq("accounting_year_id", yearId!).order("transaction_date", { ascending: false });
+      let q = supabase.from("transactions").select("*").eq("principal_id", principalId);
+      if (viewYearId) q = q.eq("accounting_year_id", viewYearId);
+      const { data, error } = await q.order("transaction_date", { ascending: false });
       if (error) throw error;
       return data;
     },
   });
 
   const filtered = useMemo(() => {
-    return txs.filter((t) => {
+    const rows = txs.filter((t) => {
       if (filterType !== "all" && t.type !== filterType) return false;
       if (filterCategory !== "all" && t.category_id !== filterCategory) return false;
       return true;
     });
-  }, [txs, filterType, filterCategory]);
+    const sorted = [...rows].sort((a, b) => {
+      if (sortKey === "date_desc") return String(b.transaction_date).localeCompare(String(a.transaction_date));
+      if (sortKey === "date_asc") return String(a.transaction_date).localeCompare(String(b.transaction_date));
+      const av = Number(a.amount), bv = Number(b.amount);
+      return sortKey === "amount_desc" ? bv - av : av - bv;
+    });
+    return sorted;
+  }, [txs, filterType, filterCategory, sortKey]);
 
   const accountName = (id: string | null) => accounts.find((a) => a.id === id)?.name ?? "—";
   const categoryName = (id: string | null) => categories.find((c) => c.id === id)?.name ?? "";
@@ -363,7 +408,8 @@ function Transactions({ yearId, principalId }: { yearId: string | null; principa
   const save = async () => {
     const parsed = txSchema.safeParse(form);
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
-    if (!yearId) return toast.error("Välj redovisningsår först");
+    const targetYearId = viewYearId ?? defaultYearId;
+    if (!targetYearId) return toast.error("Välj redovisningsår först");
     if (parsed.data.type === "transfer" && !parsed.data.counter_account_id)
       return toast.error("Välj motkonto för överföring");
     const { data: s } = await supabase.auth.getSession();
@@ -381,7 +427,7 @@ function Transactions({ yearId, principalId }: { yearId: string | null; principa
     };
     const res = editing
       ? await supabase.from("transactions").update(base).eq("id", editing)
-      : await supabase.from("transactions").insert({ owner_id, principal_id: principalId, accounting_year_id: yearId, ...base });
+      : await supabase.from("transactions").insert({ owner_id, principal_id: principalId, accounting_year_id: targetYearId, ...base });
     if (res.error) return toast.error(res.error.message);
     toast.success(editing ? "Sparad" : "Registrerad");
     setOpen(false);
@@ -435,6 +481,15 @@ function Transactions({ yearId, principalId }: { yearId: string | null; principa
             <SelectContent>
               <SelectItem value="all">Alla kategorier</SelectItem>
               {categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.name} ({c.kind === "income" ? "inkomst" : "utgift"})</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Select value={sortKey} onValueChange={(v) => setSortKey(v as typeof sortKey)}>
+            <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="date_desc">Datum, nyast först</SelectItem>
+              <SelectItem value="date_asc">Datum, äldst först</SelectItem>
+              <SelectItem value="amount_desc">Belopp, störst först</SelectItem>
+              <SelectItem value="amount_asc">Belopp, minst först</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -583,13 +638,13 @@ function Transactions({ yearId, principalId }: { yearId: string | null; principa
 }
 
 // ---------- Overview ----------
-function Overview({ yearId }: { yearId: string | null }) {
+function Overview({ viewYearId }: { viewYearId: string | null }) {
   const { data: txs = [] } = useQuery({
-    queryKey: ["transactions", yearId],
-    enabled: !!yearId,
+    queryKey: ["transactions-overview", viewYearId ?? "all"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("transactions").select("*")
-        .eq("accounting_year_id", yearId!);
+      let q = supabase.from("transactions").select("*");
+      if (viewYearId) q = q.eq("accounting_year_id", viewYearId);
+      const { data, error } = await q;
       if (error) throw error;
       return data;
     },
@@ -614,7 +669,6 @@ function Overview({ yearId }: { yearId: string | null }) {
     return { income, expense, net: income - expense, cats };
   }, [txs, categories]);
 
-  if (!yearId) return <Card><CardContent className="py-8 text-center text-sm text-muted-foreground">Välj redovisningsår.</CardContent></Card>;
 
   return (
     <div className="space-y-4">
