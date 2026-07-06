@@ -176,8 +176,11 @@ function DocumentsPage() {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h1 className="text-2xl font-semibold">Dokument</h1>
-          <p className="text-sm text-muted-foreground">Ladda upp och organisera dokument</p>
+          <p className="text-sm text-muted-foreground">
+            Ladda upp och organisera dokument{selectedYear ? ` · Redovisningsår ${selectedYear.year} + generella` : ""}
+          </p>
         </div>
+
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button onClick={openNew}><Plus className="h-4 w-4 mr-1" /> Nytt dokument</Button>
