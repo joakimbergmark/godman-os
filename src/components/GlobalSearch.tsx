@@ -22,7 +22,13 @@ async function runSearch(raw: string): Promise<Hit[]> {
   const like = `%${q}%`;
   const limit = 10;
 
-  const [act, doc, con, tsk, pri] = await Promise.all([
+  const numeric = Number(q.replace(",", "."));
+  const isNum = !isNaN(numeric) && q.match(/^[0-9.,]+$/);
+  const txFilter = isNum
+    ? `comment.ilike.${like},amount.eq.${numeric}`
+    : `comment.ilike.${like}`;
+
+  const [act, doc, con, tsk, pri, trx] = await Promise.all([
     supabase.from("activities")
       .select("id,title,description,activity_date")
       .or(`title.ilike.${like},description.ilike.${like},category.ilike.${like}`)
@@ -43,7 +49,12 @@ async function runSearch(raw: string): Promise<Hit[]> {
       .select("id,full_name,personal_number,email,phone,address,city,notes")
       .or(`full_name.ilike.${like},personal_number.ilike.${like},email.ilike.${like},phone.ilike.${like},address.ilike.${like},city.ilike.${like},notes.ilike.${like}`)
       .limit(limit),
+    supabase.from("transactions")
+      .select("id,comment,amount,type,transaction_date")
+      .or(txFilter)
+      .limit(limit),
   ]);
+
 
   const hits: Hit[] = [];
   (act.data ?? []).forEach((r) => hits.push({ type: "activity", id: r.id, title: r.title, description: r.description, date: r.activity_date }));
