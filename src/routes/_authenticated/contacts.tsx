@@ -111,7 +111,10 @@ function ContactsPage() {
       phone: parsed.data.phone || null,
       email: parsed.data.email || null,
       address: parsed.data.address || null,
+      postal_code: parsed.data.postal_code || null,
+      city: parsed.data.city || null,
       notes: parsed.data.notes || null,
+
     };
     const res = editing
       ? await supabase.from("contacts").update(payload).eq("id", editing)
