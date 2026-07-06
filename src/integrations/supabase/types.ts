@@ -14,8 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      accounting_years: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          owner_id: string
+          principal_id: string
+          status: string
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          owner_id: string
+          principal_id: string
+          status?: string
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          owner_id?: string
+          principal_id?: string
+          status?: string
+          updated_at?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounting_years_principal_id_fkey"
+            columns: ["principal_id"]
+            isOneToOne: false
+            referencedRelation: "principal"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       activities: {
         Row: {
+          accounting_year_id: string | null
           activity_date: string
           category: string | null
           created_at: string
@@ -27,6 +69,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          accounting_year_id?: string | null
           activity_date?: string
           category?: string | null
           created_at?: string
@@ -38,6 +81,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          accounting_year_id?: string | null
           activity_date?: string
           category?: string | null
           created_at?: string
@@ -48,7 +92,15 @@ export type Database = {
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "activities_accounting_year_id_fkey"
+            columns: ["accounting_year_id"]
+            isOneToOne: false
+            referencedRelation: "accounting_years"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       contacts: {
         Row: {
@@ -100,6 +152,7 @@ export type Database = {
       }
       documents: {
         Row: {
+          accounting_year_id: string | null
           category: string | null
           comment: string | null
           created_at: string
@@ -114,6 +167,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          accounting_year_id?: string | null
           category?: string | null
           comment?: string | null
           created_at?: string
@@ -128,6 +182,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          accounting_year_id?: string | null
           category?: string | null
           comment?: string | null
           created_at?: string
@@ -141,7 +196,15 @@ export type Database = {
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "documents_accounting_year_id_fkey"
+            columns: ["accounting_year_id"]
+            isOneToOne: false
+            referencedRelation: "accounting_years"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       principal: {
         Row: {
@@ -190,6 +253,7 @@ export type Database = {
       }
       tasks: {
         Row: {
+          accounting_year_id: string | null
           created_at: string
           deadline: string | null
           description: string | null
@@ -201,6 +265,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          accounting_year_id?: string | null
           created_at?: string
           deadline?: string | null
           description?: string | null
@@ -212,6 +277,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          accounting_year_id?: string | null
           created_at?: string
           deadline?: string | null
           description?: string | null
@@ -222,7 +288,15 @@ export type Database = {
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tasks_accounting_year_id_fkey"
+            columns: ["accounting_year_id"]
+            isOneToOne: false
+            referencedRelation: "accounting_years"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
