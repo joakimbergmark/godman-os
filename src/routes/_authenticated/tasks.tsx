@@ -159,7 +159,10 @@ function TasksPage() {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h1 className="text-2xl font-semibold">Uppgifter</h1>
-          <p className="text-sm text-muted-foreground">Att-göra-lista</p>
+          <p className="text-sm text-muted-foreground">
+            Att-göra-lista{selectedYear ? ` · Redovisningsår ${selectedYear.year}` : ""}
+          </p>
+
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
