@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { z } from "zod";
@@ -41,8 +41,10 @@ const empty: FormState = {
 
 function PrincipalPage() {
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const [form, setForm] = useState<FormState>(empty);
   const [saving, setSaving] = useState(false);
+
 
   const { data, isLoading } = useQuery({
     queryKey: ["principal"],
@@ -73,12 +75,15 @@ function PrincipalPage() {
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
     setSaving(true);
     try {
-      const { data: userRes } = await supabase.auth.getUser();
-      const owner_id = userRes.user?.id;
-      if (!owner_id) throw new Error("Ej inloggad");
+      const { data: sessionRes } = await supabase.auth.getSession();
+      const owner_id = sessionRes.session?.user?.id;
+      if (!owner_id) {
+        toast.error("Sessionen har gått ut, logga in igen");
+        navigate({ to: "/auth" });
+        return;
+      }
 
-      const payload = {
-        owner_id,
+      const base = {
         full_name: parsed.data.full_name,
         personal_number: parsed.data.personal_number || null,
         address: parsed.data.address || null,
@@ -89,12 +94,13 @@ function PrincipalPage() {
         notes: parsed.data.notes || null,
       };
       if (data?.id) {
-        const { error } = await supabase.from("principal").update(payload).eq("id", data.id);
+        const { error } = await supabase.from("principal").update(base).eq("id", data.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("principal").insert(payload);
+        const { error } = await supabase.from("principal").insert({ owner_id, ...base });
         if (error) throw error;
       }
+
       toast.success("Sparat");
       qc.invalidateQueries({ queryKey: ["principal"] });
       qc.invalidateQueries({ queryKey: ["dashboard"] });

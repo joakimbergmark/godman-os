@@ -112,12 +112,15 @@ function ContactsPage() {
   const save = async () => {
     const parsed = schema.safeParse(form);
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
-    const { data: userRes } = await supabase.auth.getUser();
-    const owner_id = userRes.user?.id;
-    if (!owner_id) return toast.error("Ej inloggad");
+    const { data: sessionRes } = await supabase.auth.getSession();
+    const owner_id = sessionRes.session?.user?.id;
+    if (!owner_id) {
+      toast.error("Sessionen har gått ut, logga in igen");
+      navigate({ to: "/auth" });
+      return;
+    }
 
-    const payload = {
-      owner_id,
+    const base = {
       name: parsed.data.name,
       category: parsed.data.category || null,
       organization: parsed.data.organization || null,
@@ -127,16 +130,16 @@ function ContactsPage() {
       postal_code: parsed.data.postal_code || null,
       city: parsed.data.city || null,
       notes: parsed.data.notes || null,
-
     };
     const res = editing
-      ? await supabase.from("contacts").update(payload).eq("id", editing)
-      : await supabase.from("contacts").insert(payload);
+      ? await supabase.from("contacts").update(base).eq("id", editing)
+      : await supabase.from("contacts").insert({ owner_id, ...base });
     if (res.error) return toast.error(res.error.message);
     toast.success(editing ? "Sparad" : "Tillagd");
     setOpen(false);
     qc.invalidateQueries({ queryKey: ["contacts"] });
   };
+
 
   const del = async (id: string) => {
     if (!confirm("Ta bort kontakten?")) return;

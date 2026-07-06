@@ -96,13 +96,16 @@ function ActivitiesPage() {
   const save = async () => {
     const parsed = schema.safeParse(form);
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
-    const { data: userRes } = await supabase.auth.getUser();
-    const owner_id = userRes.user?.id;
-    if (!owner_id) return toast.error("Ej inloggad");
+    const { data: sessionRes } = await supabase.auth.getSession();
+    const owner_id = sessionRes.session?.user?.id;
+    if (!owner_id) {
+      toast.error("Sessionen har gått ut, logga in igen");
+      navigate({ to: "/auth" });
+      return;
+    }
     const tags = (parsed.data.tags || "")
       .split(",").map((s) => s.trim()).filter(Boolean);
-    const payload = {
-      owner_id,
+    const base = {
       activity_date: parsed.data.activity_date,
       title: parsed.data.title,
       description: parsed.data.description || null,
@@ -110,14 +113,15 @@ function ActivitiesPage() {
       tags,
     };
     const res = editing
-      ? await supabase.from("activities").update(payload).eq("id", editing)
-      : await supabase.from("activities").insert(payload);
+      ? await supabase.from("activities").update(base).eq("id", editing)
+      : await supabase.from("activities").insert({ owner_id, ...base });
     if (res.error) return toast.error(res.error.message);
     toast.success(editing ? "Sparad" : "Tillagd");
     setOpen(false);
     qc.invalidateQueries({ queryKey: ["activities"] });
     qc.invalidateQueries({ queryKey: ["dashboard"] });
   };
+
 
   const del = async (id: string) => {
     if (!confirm("Ta bort aktiviteten?")) return;

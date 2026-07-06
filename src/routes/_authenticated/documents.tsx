@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useRef, useState } from "react";
 import { z } from "zod";
@@ -35,6 +35,8 @@ const empty: Meta = { title: "", category: "", document_date: "", comment: "" };
 
 function DocumentsPage() {
   const qc = useQueryClient();
+  const navigate = useNavigate();
+
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<"created_at" | "title" | "category" | "document_date">("created_at");
   const [open, setOpen] = useState(false);
@@ -83,9 +85,14 @@ function DocumentsPage() {
   const save = async () => {
     const parsed = metaSchema.safeParse(form);
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
-    const { data: userRes } = await supabase.auth.getUser();
-    const owner_id = userRes.user?.id;
-    if (!owner_id) return toast.error("Ej inloggad");
+    const { data: sessionRes } = await supabase.auth.getSession();
+    const owner_id = sessionRes.session?.user?.id;
+    if (!owner_id) {
+      toast.error("Sessionen har gått ut, logga in igen");
+      navigate({ to: "/auth" });
+      return;
+    }
+
 
     setUploading(true);
     try {
