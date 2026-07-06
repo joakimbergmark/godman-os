@@ -108,22 +108,26 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const current = items.find((i) => i.url === pathname);
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
-        <AppSidebar />
-        <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-16 border-b border-border flex items-center gap-3 px-4 sticky top-0 bg-background/90 backdrop-blur z-10 shadow-sm">
-            <SidebarTrigger />
-            <h1 className="text-lg font-semibold text-foreground truncate hidden sm:block min-w-[100px]">
-              {current?.title ?? ""}
-            </h1>
-            <div className="flex-1 flex justify-center">
-              <GlobalSearch />
-            </div>
-          </header>
-          <main className="flex-1 p-4 sm:p-6 max-w-6xl w-full mx-auto">{children}</main>
+    <AccountingYearProvider>
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full bg-background">
+          <AppSidebar />
+          <div className="flex-1 flex flex-col min-w-0">
+            <header className="h-16 border-b border-border flex items-center gap-3 px-4 sticky top-0 bg-background/90 backdrop-blur z-10 shadow-sm">
+              <SidebarTrigger />
+              <h1 className="text-lg font-semibold text-foreground truncate hidden sm:block min-w-[100px]">
+                {current?.title ?? ""}
+              </h1>
+              <div className="flex-1 flex justify-center">
+                <GlobalSearch />
+              </div>
+              <AccountingYearSelector />
+            </header>
+            <main className="flex-1 p-4 sm:p-6 max-w-6xl w-full mx-auto">{children}</main>
+          </div>
         </div>
-      </div>
-    </SidebarProvider>
+      </SidebarProvider>
+    </AccountingYearProvider>
   );
 }
+
