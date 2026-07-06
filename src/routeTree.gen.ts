@@ -16,6 +16,7 @@ import { Route as AuthenticatedYearOverviewRouteImport } from './routes/_authent
 import { Route as AuthenticatedTimelineRouteImport } from './routes/_authenticated/timeline'
 import { Route as AuthenticatedTasksRouteImport } from './routes/_authenticated/tasks'
 import { Route as AuthenticatedPrincipalRouteImport } from './routes/_authenticated/principal'
+import { Route as AuthenticatedEconomyRouteImport } from './routes/_authenticated/economy'
 import { Route as AuthenticatedDocumentsRouteImport } from './routes/_authenticated/documents'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedContactsRouteImport } from './routes/_authenticated/contacts'
@@ -56,6 +57,11 @@ const AuthenticatedPrincipalRoute = AuthenticatedPrincipalRouteImport.update({
   path: '/principal',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedEconomyRoute = AuthenticatedEconomyRouteImport.update({
+  id: '/economy',
+  path: '/economy',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDocumentsRoute = AuthenticatedDocumentsRouteImport.update({
   id: '/documents',
   path: '/documents',
@@ -84,6 +90,7 @@ export interface FileRoutesByFullPath {
   '/contacts': typeof AuthenticatedContactsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/documents': typeof AuthenticatedDocumentsRoute
+  '/economy': typeof AuthenticatedEconomyRoute
   '/principal': typeof AuthenticatedPrincipalRoute
   '/tasks': typeof AuthenticatedTasksRoute
   '/timeline': typeof AuthenticatedTimelineRoute
@@ -96,6 +103,7 @@ export interface FileRoutesByTo {
   '/contacts': typeof AuthenticatedContactsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/documents': typeof AuthenticatedDocumentsRoute
+  '/economy': typeof AuthenticatedEconomyRoute
   '/principal': typeof AuthenticatedPrincipalRoute
   '/tasks': typeof AuthenticatedTasksRoute
   '/timeline': typeof AuthenticatedTimelineRoute
@@ -110,6 +118,7 @@ export interface FileRoutesById {
   '/_authenticated/contacts': typeof AuthenticatedContactsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/documents': typeof AuthenticatedDocumentsRoute
+  '/_authenticated/economy': typeof AuthenticatedEconomyRoute
   '/_authenticated/principal': typeof AuthenticatedPrincipalRoute
   '/_authenticated/tasks': typeof AuthenticatedTasksRoute
   '/_authenticated/timeline': typeof AuthenticatedTimelineRoute
@@ -124,6 +133,7 @@ export interface FileRouteTypes {
     | '/contacts'
     | '/dashboard'
     | '/documents'
+    | '/economy'
     | '/principal'
     | '/tasks'
     | '/timeline'
@@ -136,6 +146,7 @@ export interface FileRouteTypes {
     | '/contacts'
     | '/dashboard'
     | '/documents'
+    | '/economy'
     | '/principal'
     | '/tasks'
     | '/timeline'
@@ -149,6 +160,7 @@ export interface FileRouteTypes {
     | '/_authenticated/contacts'
     | '/_authenticated/dashboard'
     | '/_authenticated/documents'
+    | '/_authenticated/economy'
     | '/_authenticated/principal'
     | '/_authenticated/tasks'
     | '/_authenticated/timeline'
@@ -212,6 +224,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPrincipalRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/economy': {
+      id: '/_authenticated/economy'
+      path: '/economy'
+      fullPath: '/economy'
+      preLoaderRoute: typeof AuthenticatedEconomyRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/documents': {
       id: '/_authenticated/documents'
       path: '/documents'
@@ -248,6 +267,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedContactsRoute: typeof AuthenticatedContactsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDocumentsRoute: typeof AuthenticatedDocumentsRoute
+  AuthenticatedEconomyRoute: typeof AuthenticatedEconomyRoute
   AuthenticatedPrincipalRoute: typeof AuthenticatedPrincipalRoute
   AuthenticatedTasksRoute: typeof AuthenticatedTasksRoute
   AuthenticatedTimelineRoute: typeof AuthenticatedTimelineRoute
@@ -259,6 +279,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedContactsRoute: AuthenticatedContactsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDocumentsRoute: AuthenticatedDocumentsRoute,
+  AuthenticatedEconomyRoute: AuthenticatedEconomyRoute,
   AuthenticatedPrincipalRoute: AuthenticatedPrincipalRoute,
   AuthenticatedTasksRoute: AuthenticatedTasksRoute,
   AuthenticatedTimelineRoute: AuthenticatedTimelineRoute,
