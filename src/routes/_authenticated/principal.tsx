@@ -41,8 +41,10 @@ const empty: FormState = {
 
 function PrincipalPage() {
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const [form, setForm] = useState<FormState>(empty);
   const [saving, setSaving] = useState(false);
+
 
   const { data, isLoading } = useQuery({
     queryKey: ["principal"],
