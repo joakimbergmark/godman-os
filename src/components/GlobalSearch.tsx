@@ -62,6 +62,7 @@ async function runSearch(raw: string): Promise<Hit[]> {
   (con.data ?? []).forEach((r) => hits.push({ type: "contact", id: r.id, name: r.name, organization: r.organization }));
   (tsk.data ?? []).forEach((r) => hits.push({ type: "task", id: r.id, title: r.title, status: r.status }));
   (pri.data ?? []).forEach((r) => hits.push({ type: "principal", id: r.id, full_name: r.full_name }));
+  (trx.data ?? []).forEach((r) => hits.push({ type: "transaction", id: r.id, comment: r.comment ?? "", amount: Number(r.amount), txType: r.type, date: r.transaction_date }));
   return hits;
 }
 
