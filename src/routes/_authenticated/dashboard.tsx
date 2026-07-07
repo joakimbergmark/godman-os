@@ -121,6 +121,32 @@ function Dashboard() {
         <StatCard title="Deadline inom 30 dgr" value={dueSoon.length} icon={<Clock className="h-4 w-4" />} to="/cases" />
       </div>
 
+      <Card>
+        <CardHeader><CardTitle className="text-base flex items-center gap-2"><ShieldCheck className="h-4 w-4" />Åtaganden som löper ut</CardTitle></CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-3">
+            <ExpiryBucket label="Inom 30 dagar" tone="red" count={expiring.d30.length} />
+            <ExpiryBucket label="Inom 60 dagar" tone="yellow" count={expiring.d60.length} />
+            <ExpiryBucket label="Inom 90 dagar" tone="green" count={expiring.d90.length} />
+          </div>
+          {expiring.all.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Inga åtaganden med förnyelse inom 90 dagar.</p>
+          ) : (
+            <div className="space-y-2">
+              {expiring.all.slice(0, 8).map(({ o, days, tier }) => (
+                <Link key={o.id} to="/obligations/$obligationId" params={{ obligationId: o.id }} className="flex items-center justify-between gap-2 text-sm border-b border-border/50 last:border-0 pb-2 last:pb-0 hover:text-primary">
+                  <div className="min-w-0">
+                    <div className="font-medium truncate">{o.title}</div>
+                    <div className="text-xs text-muted-foreground">{obligationTypeLabel(o.obligation_type)}</div>
+                  </div>
+                  <Badge variant="outline" className={expiryTierClass[tier]}>{expiryTierLabel(tier, days)}</Badge>
+                </Link>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader><CardTitle className="text-base flex items-center gap-2"><Clock className="h-4 w-4" />Deadline kommande 30 dagar</CardTitle></CardHeader>
