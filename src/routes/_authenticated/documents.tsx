@@ -120,6 +120,7 @@ function DocumentsPage() {
         document_date: parsed.data.document_date || null,
         comment: parsed.data.comment || null,
         accounting_year_id,
+        case_id: parsed.data.case_id || null,
       };
 
       if (editing) {
