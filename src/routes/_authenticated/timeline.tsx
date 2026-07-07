@@ -140,5 +140,6 @@ function TimelineCard({ item, onClick }: { item: Item; onClick: () => void }) {
 function iconFor(item: Item) {
   if (item.type === "activity") return { icon: <Activity className="h-4 w-4" />, badge: "Aktivitet", badgeClass: "" };
   if (item.type === "document") return { icon: <FileText className="h-4 w-4" />, badge: "Dokument", badgeClass: "" };
+  if (item.type === "decision") return { icon: <Activity className="h-4 w-4" />, badge: "Beslut", badgeClass: "" };
   return { icon: <CheckSquare className="h-4 w-4" />, badge: "Uppgift", badgeClass: "" };
 }
