@@ -19,6 +19,7 @@ import {
 import { toast } from "sonner";
 import { Pencil, Plus, Search, Trash2, ArrowUpDown } from "lucide-react";
 import { useAccountingYear } from "@/lib/accounting-year";
+import { CaseSelector } from "@/components/CaseSelector";
 
 
 export const Route = createFileRoute("/_authenticated/tasks")({
@@ -38,9 +39,10 @@ const schema = z.object({
   deadline: z.string().optional().or(z.literal("")),
   priority: z.enum(["low", "medium", "high"]),
   status: z.enum(["open", "in_progress", "done"]),
+  case_id: z.string().nullable().optional(),
 });
 type Form = z.infer<typeof schema>;
-const empty: Form = { title: "", description: "", deadline: "", priority: "medium", status: "open" };
+const empty: Form = { title: "", description: "", deadline: "", priority: "medium", status: "open", case_id: null };
 
 function TasksPage() {
   const qc = useQueryClient();
