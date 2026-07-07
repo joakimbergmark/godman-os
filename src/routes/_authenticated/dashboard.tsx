@@ -129,7 +129,7 @@ function Dashboard() {
       (doc.data ?? []).forEach((r) => out.push({ type: "document", id: r.id, title: r.title, created_at: r.created_at, meta: { storage_path: r.storage_path } }));
       (tsk.data ?? []).forEach((r) => out.push({ type: "task", id: r.id, title: r.title, created_at: r.created_at, meta: {} }));
       (dec.data ?? []).forEach((r) => out.push({ type: "decision", id: r.id, title: r.title, created_at: r.created_at, meta: { case_id: r.case_id } }));
-      (tx.data ?? []).forEach((r) => out.push({ type: "transaction", id: r.id, title: r.description ?? "Transaktion", created_at: r.created_at, meta: { amount: r.amount } }));
+      (tx.data ?? []).forEach((r) => out.push({ type: "transaction", id: r.id, title: r.comment ?? "Transaktion", created_at: r.created_at, meta: { amount: r.amount } }));
       return out.sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 12);
     },
   });
