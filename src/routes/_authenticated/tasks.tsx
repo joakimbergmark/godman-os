@@ -128,6 +128,7 @@ function TasksPage() {
       deadline: parsed.data.deadline || null,
       priority: parsed.data.priority,
       status: parsed.data.status,
+      case_id: parsed.data.case_id || null,
     };
     const res = editing
       ? await supabase.from("tasks").update(base).eq("id", editing)
