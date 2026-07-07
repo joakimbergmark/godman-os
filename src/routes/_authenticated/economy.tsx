@@ -428,6 +428,7 @@ function Transactions({
       account_id: parsed.data.account_id,
       counter_account_id: parsed.data.type === "transfer" ? parsed.data.counter_account_id : null,
       document_id: parsed.data.document_id || null,
+      case_id: parsed.data.case_id || null,
       comment: parsed.data.comment || null,
     };
     const res = editing
