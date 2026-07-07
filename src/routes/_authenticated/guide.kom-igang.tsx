@@ -22,8 +22,18 @@ export const Route = createFileRoute("/_authenticated/guide/kom-igang")({
           årsstart.
         </li>
         <li>
-          <strong>Registrera löpande</strong> aktiviteter, dokument och transaktioner allt eftersom
-          året går.
+          <strong>Lägg upp dina första ärenden</strong> under <em>Ärenden</em>. Välj livsområde
+          (Ekonomi, Myndigheter, Hälsa, Boende, Juridik…), sätt prioritet och deadline. Ett ärende
+          samlar allt arbete kring en fråga.
+        </li>
+        <li>
+          <strong>Registrera åtaganden</strong> under <em>Åtaganden</em> för myndighetsbeslut,
+          tillstånd och bidrag som har giltighetstid — så påminner appen dig när de närmar sig
+          slutdatum.
+        </li>
+        <li>
+          <strong>Registrera löpande</strong> aktiviteter, dokument, uppgifter och transaktioner —
+          koppla dem till rätt ärende när det finns ett.
         </li>
       </ol>
     </>
