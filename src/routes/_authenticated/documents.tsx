@@ -18,6 +18,7 @@ import {
 import { toast } from "sonner";
 import { Download, Pencil, Plus, Search, Trash2, ArrowUpDown, FileText } from "lucide-react";
 import { useAccountingYear } from "@/lib/accounting-year";
+import { CaseSelector } from "@/components/CaseSelector";
 
 
 export const Route = createFileRoute("/_authenticated/documents")({
@@ -32,9 +33,10 @@ const metaSchema = z.object({
   document_date: z.string().optional().or(z.literal("")),
   comment: z.string().max(2000).optional().or(z.literal("")),
   year_scope: z.enum(["current", "general"]),
+  case_id: z.string().nullable().optional(),
 });
 type Meta = z.infer<typeof metaSchema>;
-const empty: Meta = { title: "", category: "", document_date: "", comment: "", year_scope: "current" };
+const empty: Meta = { title: "", category: "", document_date: "", comment: "", year_scope: "current", case_id: null };
 
 
 function DocumentsPage() {
