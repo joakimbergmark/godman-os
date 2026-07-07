@@ -404,6 +404,7 @@ function Transactions({
       account_id: t.account_id,
       counter_account_id: t.counter_account_id ?? "",
       document_id: t.document_id ?? "",
+      case_id: t.case_id ?? null,
       comment: t.comment ?? "",
     });
     setOpen(true);
