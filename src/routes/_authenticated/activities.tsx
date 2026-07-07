@@ -124,6 +124,7 @@ function ActivitiesPage() {
       description: parsed.data.description || null,
       category: parsed.data.category || null,
       tags,
+      case_id: parsed.data.case_id || null,
     };
     const res = editing
       ? await supabase.from("activities").update(base).eq("id", editing)
