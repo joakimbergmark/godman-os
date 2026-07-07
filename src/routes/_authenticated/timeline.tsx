@@ -43,7 +43,11 @@ function TimelinePage() {
       }));
       (tsk.data ?? []).forEach((r) => items.push({
         type: "task", id: r.id, title: r.title, description: r.description,
-        created_at: r.created_at, meta: { status: r.status, deadline: r.deadline },
+        created_at: r.created_at, meta: { status: r.status, deadline: r.deadline, case_id: r.case_id },
+      }));
+      (dec.data ?? []).forEach((r) => items.push({
+        type: "decision", id: r.id, title: r.title, description: r.description,
+        created_at: r.created_at, meta: { case_id: r.case_id, decision_date: r.decision_date },
       }));
       return items.sort((a, b) => b.created_at.localeCompare(a.created_at));
     },
