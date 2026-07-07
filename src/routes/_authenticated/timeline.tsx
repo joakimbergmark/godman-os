@@ -12,7 +12,7 @@ export const Route = createFileRoute("/_authenticated/timeline")({
 });
 
 type Item = {
-  type: "activity" | "document" | "task";
+  type: "activity" | "document" | "task" | "decision";
   id: string;
   title: string;
   description?: string | null;
