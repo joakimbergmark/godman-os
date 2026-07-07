@@ -17,12 +17,24 @@ export const Route = createFileRoute("/_authenticated/guide/vidareutveckling")({
           <code>src/components/ui/</code>.</li>
       </ul>
 
+      <h3>Referensdokument</h3>
+      <ul>
+        <li><code>docs/ARCHITECTURE.md</code> — vision, designprinciper, domänmodell och
+          livsområden. <strong>All ny funktionalitet valideras mot detta dokument.</strong></li>
+        <li><code>docs/DATA_MODEL.md</code> — läsbar beskrivning av alla tabeller och relationer.</li>
+      </ul>
+
       <h3>Datamodell (kärnan)</h3>
       <ul>
         <li><code>principal</code> — huvudmannen.</li>
         <li><code>accounting_years</code> — ett år per huvudman.</li>
+        <li><code>cases</code> — <strong>navet</strong>. Alla operativa objekt bör kopplas hit via
+          <code>case_id</code>.</li>
+        <li><code>obligations</code> + <code>case_decisions</code> — myndighetsbeslut, tillstånd
+          och bidrag som levande objekt med giltighet och uppföljning.</li>
         <li><code>activities</code>, <code>tasks</code>, <code>documents</code>,
-          <code>transactions</code> — allt kopplat till <code>accounting_year_id</code>.</li>
+          <code>transactions</code> — årsbundna via <code>accounting_year_id</code>, kopplas till
+          ärende via <code>case_id</code>.</li>
         <li><code>contacts</code> — årsoberoende adressbok.</li>
         <li><code>accounts</code>, <code>transaction_categories</code>,
           <code>transactions</code> — ekonomimodulen.</li>
@@ -58,6 +70,9 @@ export const Route = createFileRoute("/_authenticated/guide/vidareutveckling")({
         <li><code>owner_id</code> sätts endast vid INSERT — aldrig vid UPDATE (RLS skyddar
           raden).</li>
         <li>Dokument lagras i storage-bucketen <code>documents</code> med signerade URL:er.</li>
+        <li>Belopp formateras alltid svenskt med två decimaler och "kr" (t.ex. 405,49 kr).</li>
+        <li>Registrera inte data för datans skull — bara det som hjälper användaren utföra sitt
+          uppdrag.</li>
       </ul>
     </>
   ),
