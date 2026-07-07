@@ -90,6 +90,7 @@ function ActivitiesPage() {
       description: row.description ?? "",
       category: row.category ?? "",
       tags: (row.tags ?? []).join(", "),
+      case_id: row.case_id ?? null,
     });
     setOpen(true);
   };
