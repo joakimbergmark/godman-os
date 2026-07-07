@@ -26,10 +26,11 @@ function TimelinePage() {
   const { data = [], isLoading } = useQuery({
     queryKey: ["timeline"],
     queryFn: async (): Promise<Item[]> => {
-      const [act, doc, tsk] = await Promise.all([
-        supabase.from("activities").select("id,title,description,activity_date,category,created_at").order("created_at", { ascending: false }).limit(100),
-        supabase.from("documents").select("id,title,category,file_name,storage_path,document_date,created_at").order("created_at", { ascending: false }).limit(100),
-        supabase.from("tasks").select("id,title,description,status,deadline,priority,created_at,updated_at").order("created_at", { ascending: false }).limit(100),
+      const [act, doc, tsk, dec] = await Promise.all([
+        supabase.from("activities").select("id,title,description,activity_date,category,created_at,case_id").order("created_at", { ascending: false }).limit(100),
+        supabase.from("documents").select("id,title,category,file_name,storage_path,document_date,created_at,case_id").order("created_at", { ascending: false }).limit(100),
+        supabase.from("tasks").select("id,title,description,status,deadline,priority,created_at,updated_at,case_id").order("created_at", { ascending: false }).limit(100),
+        supabase.from("case_decisions").select("id,title,description,decision_date,case_id,created_at").order("created_at", { ascending: false }).limit(100),
       ]);
       const items: Item[] = [];
       (act.data ?? []).forEach((r) => items.push({
