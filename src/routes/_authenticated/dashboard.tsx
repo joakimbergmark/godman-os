@@ -63,6 +63,16 @@ function Dashboard() {
     },
   });
 
+  const { data: obligations = [] } = useQuery({
+    queryKey: ["dash-obligations", yearId],
+    enabled: !!yearId,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("obligations").select("*").eq("accounting_year_id", yearId!);
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const now = Date.now();
   const openCases = useMemo(() => cases.filter((c) => OPEN_STATUSES.includes(c.status as never)), [cases]);
   const staleCases = useMemo(() => openCases.filter((c) => {
