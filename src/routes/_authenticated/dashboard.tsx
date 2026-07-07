@@ -4,12 +4,13 @@ import { useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Briefcase, AlertTriangle, Clock, Layers } from "lucide-react";
+import { Briefcase, AlertTriangle, Clock, Layers, ShieldCheck } from "lucide-react";
 import { useAccountingYear } from "@/lib/accounting-year";
 import {
   OPEN_STATUSES, LIFE_AREAS, lifeAreaLabel, statusLabel, priorityLabel,
   priorityClass, statusClass,
 } from "@/lib/cases";
+import { expiryTier, expiryTierClass, expiryTierLabel, daysUntil, obligationTypeLabel } from "@/lib/obligations";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   component: Dashboard,
