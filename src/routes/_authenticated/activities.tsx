@@ -187,6 +187,9 @@ function ActivitiesPage() {
                 <Label>Taggar (kommaseparerade)</Label>
                 <Input value={form.tags ?? ""} onChange={(e) => setForm({ ...form, tags: e.target.value })} placeholder="t.ex. bank, försäkringskassan" />
               </div>
+              <div className="sm:col-span-2">
+                <CaseSelector value={form.case_id ?? null} onChange={(v) => setForm({ ...form, case_id: v })} yearId={yearId} />
+              </div>
             </div>
             <DialogFooter><Button onClick={save}>{editing ? "Spara" : "Lägg till"}</Button></DialogFooter>
           </DialogContent>
