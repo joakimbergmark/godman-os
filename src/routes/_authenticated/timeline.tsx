@@ -12,7 +12,7 @@ export const Route = createFileRoute("/_authenticated/timeline")({
 });
 
 type Item = {
-  type: "activity" | "document" | "task";
+  type: "activity" | "document" | "task" | "decision";
   id: string;
   title: string;
   description?: string | null;
@@ -26,10 +26,11 @@ function TimelinePage() {
   const { data = [], isLoading } = useQuery({
     queryKey: ["timeline"],
     queryFn: async (): Promise<Item[]> => {
-      const [act, doc, tsk] = await Promise.all([
-        supabase.from("activities").select("id,title,description,activity_date,category,created_at").order("created_at", { ascending: false }).limit(100),
-        supabase.from("documents").select("id,title,category,file_name,storage_path,document_date,created_at").order("created_at", { ascending: false }).limit(100),
-        supabase.from("tasks").select("id,title,description,status,deadline,priority,created_at,updated_at").order("created_at", { ascending: false }).limit(100),
+      const [act, doc, tsk, dec] = await Promise.all([
+        supabase.from("activities").select("id,title,description,activity_date,category,created_at,case_id").order("created_at", { ascending: false }).limit(100),
+        supabase.from("documents").select("id,title,category,file_name,storage_path,document_date,created_at,case_id").order("created_at", { ascending: false }).limit(100),
+        supabase.from("tasks").select("id,title,description,status,deadline,priority,created_at,updated_at,case_id").order("created_at", { ascending: false }).limit(100),
+        supabase.from("case_decisions").select("id,title,description,decision_date,case_id,created_at").order("created_at", { ascending: false }).limit(100),
       ]);
       const items: Item[] = [];
       (act.data ?? []).forEach((r) => items.push({
@@ -42,7 +43,11 @@ function TimelinePage() {
       }));
       (tsk.data ?? []).forEach((r) => items.push({
         type: "task", id: r.id, title: r.title, description: r.description,
-        created_at: r.created_at, meta: { status: r.status, deadline: r.deadline },
+        created_at: r.created_at, meta: { status: r.status, deadline: r.deadline, case_id: r.case_id },
+      }));
+      (dec.data ?? []).forEach((r) => items.push({
+        type: "decision", id: r.id, title: r.title, description: r.description,
+        created_at: r.created_at, meta: { case_id: r.case_id, decision_date: r.decision_date },
       }));
       return items.sort((a, b) => b.created_at.localeCompare(a.created_at));
     },
@@ -68,6 +73,7 @@ function TimelinePage() {
     if (it.type === "activity") navigate({ to: "/activities", search: { highlight: it.id } });
     else if (it.type === "task") navigate({ to: "/tasks", search: { highlight: it.id } });
     else if (it.type === "document") openDoc(String(it.meta.storage_path));
+    else if (it.type === "decision" && it.meta.case_id) navigate({ to: "/cases/$caseId", params: { caseId: String(it.meta.case_id) } });
   };
 
   return (
@@ -134,5 +140,6 @@ function TimelineCard({ item, onClick }: { item: Item; onClick: () => void }) {
 function iconFor(item: Item) {
   if (item.type === "activity") return { icon: <Activity className="h-4 w-4" />, badge: "Aktivitet", badgeClass: "" };
   if (item.type === "document") return { icon: <FileText className="h-4 w-4" />, badge: "Dokument", badgeClass: "" };
+  if (item.type === "decision") return { icon: <Activity className="h-4 w-4" />, badge: "Beslut", badgeClass: "" };
   return { icon: <CheckSquare className="h-4 w-4" />, badge: "Uppgift", badgeClass: "" };
 }

@@ -21,6 +21,7 @@ import { Route as AuthenticatedEconomyRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedDocumentsRouteImport } from './routes/_authenticated/documents'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedContactsRouteImport } from './routes/_authenticated/contacts'
+import { Route as AuthenticatedCasesRouteImport } from './routes/_authenticated/cases'
 import { Route as AuthenticatedActivitiesRouteImport } from './routes/_authenticated/activities'
 import { Route as AuthenticatedGuideIndexRouteImport } from './routes/_authenticated/guide.index'
 import { Route as AuthenticatedGuideVidareutvecklingRouteImport } from './routes/_authenticated/guide.vidareutveckling'
@@ -29,6 +30,7 @@ import { Route as AuthenticatedGuideModulerRouteImport } from './routes/_authent
 import { Route as AuthenticatedGuideKomIgangRouteImport } from './routes/_authenticated/guide.kom-igang'
 import { Route as AuthenticatedGuideEkonomiRouteImport } from './routes/_authenticated/guide.ekonomi'
 import { Route as AuthenticatedGuideArbetsflodeRouteImport } from './routes/_authenticated/guide.arbetsflode'
+import { Route as AuthenticatedCasesCaseIdRouteImport } from './routes/_authenticated/cases.$caseId'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -90,6 +92,11 @@ const AuthenticatedContactsRoute = AuthenticatedContactsRouteImport.update({
   path: '/contacts',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedCasesRoute = AuthenticatedCasesRouteImport.update({
+  id: '/cases',
+  path: '/cases',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedActivitiesRoute = AuthenticatedActivitiesRouteImport.update({
   id: '/activities',
   path: '/activities',
@@ -136,11 +143,18 @@ const AuthenticatedGuideArbetsflodeRoute =
     path: '/arbetsflode',
     getParentRoute: () => AuthenticatedGuideRoute,
   } as any)
+const AuthenticatedCasesCaseIdRoute =
+  AuthenticatedCasesCaseIdRouteImport.update({
+    id: '/$caseId',
+    path: '/$caseId',
+    getParentRoute: () => AuthenticatedCasesRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/activities': typeof AuthenticatedActivitiesRoute
+  '/cases': typeof AuthenticatedCasesRouteWithChildren
   '/contacts': typeof AuthenticatedContactsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/documents': typeof AuthenticatedDocumentsRoute
@@ -150,6 +164,7 @@ export interface FileRoutesByFullPath {
   '/tasks': typeof AuthenticatedTasksRoute
   '/timeline': typeof AuthenticatedTimelineRoute
   '/year-overview': typeof AuthenticatedYearOverviewRoute
+  '/cases/$caseId': typeof AuthenticatedCasesCaseIdRoute
   '/guide/arbetsflode': typeof AuthenticatedGuideArbetsflodeRoute
   '/guide/ekonomi': typeof AuthenticatedGuideEkonomiRoute
   '/guide/kom-igang': typeof AuthenticatedGuideKomIgangRoute
@@ -162,6 +177,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/activities': typeof AuthenticatedActivitiesRoute
+  '/cases': typeof AuthenticatedCasesRouteWithChildren
   '/contacts': typeof AuthenticatedContactsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/documents': typeof AuthenticatedDocumentsRoute
@@ -170,6 +186,7 @@ export interface FileRoutesByTo {
   '/tasks': typeof AuthenticatedTasksRoute
   '/timeline': typeof AuthenticatedTimelineRoute
   '/year-overview': typeof AuthenticatedYearOverviewRoute
+  '/cases/$caseId': typeof AuthenticatedCasesCaseIdRoute
   '/guide/arbetsflode': typeof AuthenticatedGuideArbetsflodeRoute
   '/guide/ekonomi': typeof AuthenticatedGuideEkonomiRoute
   '/guide/kom-igang': typeof AuthenticatedGuideKomIgangRoute
@@ -184,6 +201,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/activities': typeof AuthenticatedActivitiesRoute
+  '/_authenticated/cases': typeof AuthenticatedCasesRouteWithChildren
   '/_authenticated/contacts': typeof AuthenticatedContactsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/documents': typeof AuthenticatedDocumentsRoute
@@ -193,6 +211,7 @@ export interface FileRoutesById {
   '/_authenticated/tasks': typeof AuthenticatedTasksRoute
   '/_authenticated/timeline': typeof AuthenticatedTimelineRoute
   '/_authenticated/year-overview': typeof AuthenticatedYearOverviewRoute
+  '/_authenticated/cases/$caseId': typeof AuthenticatedCasesCaseIdRoute
   '/_authenticated/guide/arbetsflode': typeof AuthenticatedGuideArbetsflodeRoute
   '/_authenticated/guide/ekonomi': typeof AuthenticatedGuideEkonomiRoute
   '/_authenticated/guide/kom-igang': typeof AuthenticatedGuideKomIgangRoute
@@ -207,6 +226,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/activities'
+    | '/cases'
     | '/contacts'
     | '/dashboard'
     | '/documents'
@@ -216,6 +236,7 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/timeline'
     | '/year-overview'
+    | '/cases/$caseId'
     | '/guide/arbetsflode'
     | '/guide/ekonomi'
     | '/guide/kom-igang'
@@ -228,6 +249,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/activities'
+    | '/cases'
     | '/contacts'
     | '/dashboard'
     | '/documents'
@@ -236,6 +258,7 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/timeline'
     | '/year-overview'
+    | '/cases/$caseId'
     | '/guide/arbetsflode'
     | '/guide/ekonomi'
     | '/guide/kom-igang'
@@ -249,6 +272,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/activities'
+    | '/_authenticated/cases'
     | '/_authenticated/contacts'
     | '/_authenticated/dashboard'
     | '/_authenticated/documents'
@@ -258,6 +282,7 @@ export interface FileRouteTypes {
     | '/_authenticated/tasks'
     | '/_authenticated/timeline'
     | '/_authenticated/year-overview'
+    | '/_authenticated/cases/$caseId'
     | '/_authenticated/guide/arbetsflode'
     | '/_authenticated/guide/ekonomi'
     | '/_authenticated/guide/kom-igang'
@@ -359,6 +384,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedContactsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/cases': {
+      id: '/_authenticated/cases'
+      path: '/cases'
+      fullPath: '/cases'
+      preLoaderRoute: typeof AuthenticatedCasesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/activities': {
       id: '/_authenticated/activities'
       path: '/activities'
@@ -415,8 +447,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedGuideArbetsflodeRouteImport
       parentRoute: typeof AuthenticatedGuideRoute
     }
+    '/_authenticated/cases/$caseId': {
+      id: '/_authenticated/cases/$caseId'
+      path: '/$caseId'
+      fullPath: '/cases/$caseId'
+      preLoaderRoute: typeof AuthenticatedCasesCaseIdRouteImport
+      parentRoute: typeof AuthenticatedCasesRoute
+    }
   }
 }
+
+interface AuthenticatedCasesRouteChildren {
+  AuthenticatedCasesCaseIdRoute: typeof AuthenticatedCasesCaseIdRoute
+}
+
+const AuthenticatedCasesRouteChildren: AuthenticatedCasesRouteChildren = {
+  AuthenticatedCasesCaseIdRoute: AuthenticatedCasesCaseIdRoute,
+}
+
+const AuthenticatedCasesRouteWithChildren =
+  AuthenticatedCasesRoute._addFileChildren(AuthenticatedCasesRouteChildren)
 
 interface AuthenticatedGuideRouteChildren {
   AuthenticatedGuideArbetsflodeRoute: typeof AuthenticatedGuideArbetsflodeRoute
@@ -444,6 +494,7 @@ const AuthenticatedGuideRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedActivitiesRoute: typeof AuthenticatedActivitiesRoute
+  AuthenticatedCasesRoute: typeof AuthenticatedCasesRouteWithChildren
   AuthenticatedContactsRoute: typeof AuthenticatedContactsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDocumentsRoute: typeof AuthenticatedDocumentsRoute
@@ -457,6 +508,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedActivitiesRoute: AuthenticatedActivitiesRoute,
+  AuthenticatedCasesRoute: AuthenticatedCasesRouteWithChildren,
   AuthenticatedContactsRoute: AuthenticatedContactsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDocumentsRoute: AuthenticatedDocumentsRoute,
