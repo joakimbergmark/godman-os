@@ -73,6 +73,7 @@ function TimelinePage() {
     if (it.type === "activity") navigate({ to: "/activities", search: { highlight: it.id } });
     else if (it.type === "task") navigate({ to: "/tasks", search: { highlight: it.id } });
     else if (it.type === "document") openDoc(String(it.meta.storage_path));
+    else if (it.type === "decision" && it.meta.case_id) navigate({ to: "/cases/$caseId", params: { caseId: String(it.meta.case_id) } });
   };
 
   return (
