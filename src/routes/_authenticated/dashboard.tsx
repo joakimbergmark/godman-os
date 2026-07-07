@@ -122,7 +122,7 @@ function Dashboard() {
         supabase.from("documents").select("id,title,storage_path,created_at,case_id").eq("accounting_year_id", yearId!).order("created_at", { ascending: false }).limit(10),
         supabase.from("tasks").select("id,title,status,created_at,case_id").eq("accounting_year_id", yearId!).order("created_at", { ascending: false }).limit(10),
         supabase.from("case_decisions").select("id,title,created_at,case_id").order("created_at", { ascending: false }).limit(10),
-        supabase.from("transactions").select("id,description,amount,created_at,case_id").eq("accounting_year_id", yearId!).order("created_at", { ascending: false }).limit(10),
+        supabase.from("transactions").select("id,comment,amount,created_at,case_id").eq("accounting_year_id", yearId!).order("created_at", { ascending: false }).limit(10),
       ]);
       const out: TimelineItem[] = [];
       (act.data ?? []).forEach((r) => out.push({ type: "activity", id: r.id, title: r.title, created_at: r.created_at, meta: {} }));
