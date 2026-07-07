@@ -226,6 +226,9 @@ function DocumentsPage() {
                 <Label>Kommentar</Label>
                 <Textarea rows={3} value={form.comment ?? ""} onChange={(e) => setForm({ ...form, comment: e.target.value })} />
               </div>
+              <div className="sm:col-span-2">
+                <CaseSelector value={form.case_id ?? null} onChange={(v) => setForm({ ...form, case_id: v })} yearId={yearId} />
+              </div>
 
               <div className="space-y-1.5 sm:col-span-2">
                 <Label>Fil {editing && "(valfritt – ersätter befintlig)"}</Label>
