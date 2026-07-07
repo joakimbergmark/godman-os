@@ -77,7 +77,7 @@ function AppSidebar() {
             <ShieldCheck className="h-4 w-4" />
           </div>
           <div className="min-w-0 group-data-[collapsible=icon]:hidden">
-            <div className="text-sm font-semibold truncate">God man</div>
+            <div className="text-sm font-semibold truncate">God man OS</div>
             <div className="text-[11px] text-muted-foreground truncate">Administration</div>
           </div>
         </div>
