@@ -96,6 +96,7 @@ function TasksPage() {
       deadline: row.deadline ?? "",
       priority: (row.priority as Form["priority"]) ?? "medium",
       status: (row.status as Form["status"]) ?? "open",
+      case_id: row.case_id ?? null,
     });
     setOpen(true);
   };
