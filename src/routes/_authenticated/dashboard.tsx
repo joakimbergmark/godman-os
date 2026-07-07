@@ -221,3 +221,17 @@ function StatCard({ title, value, icon, to }: { title: string; value: number; ic
     </Card>
   );
 }
+
+function ExpiryBucket({ label, tone, count }: { label: string; tone: "red" | "yellow" | "green"; count: number }) {
+  const toneClass = tone === "red"
+    ? "border-destructive/40 bg-destructive/10 text-destructive"
+    : tone === "yellow"
+    ? "border-amber-500/40 bg-amber-500/10 text-amber-600"
+    : "border-emerald-500/40 bg-emerald-500/10 text-emerald-600";
+  return (
+    <Link to="/obligations" className={`rounded-md border p-3 hover:opacity-90 ${toneClass}`}>
+      <div className="text-xs">{label}</div>
+      <div className="text-2xl font-semibold mt-1">{count}</div>
+    </Link>
+  );
+}
