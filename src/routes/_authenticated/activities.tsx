@@ -18,6 +18,7 @@ import {
 import { toast } from "sonner";
 import { Pencil, Plus, Search, Trash2, ArrowUpDown } from "lucide-react";
 import { useAccountingYear } from "@/lib/accounting-year";
+import { CaseSelector } from "@/components/CaseSelector";
 
 
 export const Route = createFileRoute("/_authenticated/activities")({
@@ -33,10 +34,11 @@ const schema = z.object({
   description: z.string().max(4000).optional().or(z.literal("")),
   category: z.string().max(60).optional().or(z.literal("")),
   tags: z.string().max(300).optional().or(z.literal("")),
+  case_id: z.string().nullable().optional(),
 });
 type Form = z.infer<typeof schema>;
 const today = () => new Date().toISOString().slice(0, 10);
-const empty: Form = { activity_date: today(), title: "", description: "", category: "", tags: "" };
+const empty: Form = { activity_date: today(), title: "", description: "", category: "", tags: "", case_id: null };
 
 function ActivitiesPage() {
   const qc = useQueryClient();
