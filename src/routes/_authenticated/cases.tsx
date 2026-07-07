@@ -76,11 +76,9 @@ function CasesPage() {
   });
 
   const { data: contacts = [] } = useQuery({
-    queryKey: ["contacts-min", principalId],
-    enabled: !!principalId,
+    queryKey: ["contacts-min"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("contacts").select("id, name").eq("principal_id", principalId!).order("name");
+      const { data, error } = await supabase.from("contacts").select("id, name").order("name");
       if (error) throw error;
       return data;
     },
