@@ -112,6 +112,7 @@ export type Database = {
         Row: {
           accounting_year_id: string | null
           activity_date: string
+          case_id: string | null
           category: string | null
           created_at: string
           description: string | null
@@ -124,6 +125,7 @@ export type Database = {
         Insert: {
           accounting_year_id?: string | null
           activity_date?: string
+          case_id?: string | null
           category?: string | null
           created_at?: string
           description?: string | null
@@ -136,6 +138,7 @@ export type Database = {
         Update: {
           accounting_year_id?: string | null
           activity_date?: string
+          case_id?: string | null
           category?: string | null
           created_at?: string
           description?: string | null
@@ -151,6 +154,136 @@ export type Database = {
             columns: ["accounting_year_id"]
             isOneToOne: false
             referencedRelation: "accounting_years"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      case_decisions: {
+        Row: {
+          case_id: string
+          created_at: string
+          decision_date: string
+          description: string | null
+          id: string
+          owner_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          case_id: string
+          created_at?: string
+          decision_date?: string
+          description?: string | null
+          id?: string
+          owner_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          case_id?: string
+          created_at?: string
+          decision_date?: string
+          description?: string | null
+          id?: string
+          owner_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "case_decisions_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cases: {
+        Row: {
+          accounting_year_id: string
+          authority_contact_id: string | null
+          category: string | null
+          completed_date: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          life_area: string
+          notes: string | null
+          owner_id: string
+          principal_id: string
+          priority: string
+          start_date: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          accounting_year_id: string
+          authority_contact_id?: string | null
+          category?: string | null
+          completed_date?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          life_area?: string
+          notes?: string | null
+          owner_id: string
+          principal_id: string
+          priority?: string
+          start_date?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          accounting_year_id?: string
+          authority_contact_id?: string | null
+          category?: string | null
+          completed_date?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          life_area?: string
+          notes?: string | null
+          owner_id?: string
+          principal_id?: string
+          priority?: string
+          start_date?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cases_accounting_year_id_fkey"
+            columns: ["accounting_year_id"]
+            isOneToOne: false
+            referencedRelation: "accounting_years"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cases_authority_contact_id_fkey"
+            columns: ["authority_contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cases_principal_id_fkey"
+            columns: ["principal_id"]
+            isOneToOne: false
+            referencedRelation: "principal"
             referencedColumns: ["id"]
           },
         ]
@@ -206,6 +339,7 @@ export type Database = {
       documents: {
         Row: {
           accounting_year_id: string | null
+          case_id: string | null
           category: string | null
           comment: string | null
           created_at: string
@@ -221,6 +355,7 @@ export type Database = {
         }
         Insert: {
           accounting_year_id?: string | null
+          case_id?: string | null
           category?: string | null
           comment?: string | null
           created_at?: string
@@ -236,6 +371,7 @@ export type Database = {
         }
         Update: {
           accounting_year_id?: string | null
+          case_id?: string | null
           category?: string | null
           comment?: string | null
           created_at?: string
@@ -255,6 +391,13 @@ export type Database = {
             columns: ["accounting_year_id"]
             isOneToOne: false
             referencedRelation: "accounting_years"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
             referencedColumns: ["id"]
           },
         ]
@@ -307,6 +450,7 @@ export type Database = {
       tasks: {
         Row: {
           accounting_year_id: string | null
+          case_id: string | null
           created_at: string
           deadline: string | null
           description: string | null
@@ -319,6 +463,7 @@ export type Database = {
         }
         Insert: {
           accounting_year_id?: string | null
+          case_id?: string | null
           created_at?: string
           deadline?: string | null
           description?: string | null
@@ -331,6 +476,7 @@ export type Database = {
         }
         Update: {
           accounting_year_id?: string | null
+          case_id?: string | null
           created_at?: string
           deadline?: string | null
           description?: string | null
@@ -347,6 +493,13 @@ export type Database = {
             columns: ["accounting_year_id"]
             isOneToOne: false
             referencedRelation: "accounting_years"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
             referencedColumns: ["id"]
           },
         ]
@@ -383,6 +536,7 @@ export type Database = {
           account_id: string
           accounting_year_id: string | null
           amount: number
+          case_id: string | null
           category_id: string | null
           comment: string | null
           counter_account_id: string | null
@@ -399,6 +553,7 @@ export type Database = {
           account_id: string
           accounting_year_id?: string | null
           amount: number
+          case_id?: string | null
           category_id?: string | null
           comment?: string | null
           counter_account_id?: string | null
@@ -415,6 +570,7 @@ export type Database = {
           account_id?: string
           accounting_year_id?: string | null
           amount?: number
+          case_id?: string | null
           category_id?: string | null
           comment?: string | null
           counter_account_id?: string | null
@@ -440,6 +596,13 @@ export type Database = {
             columns: ["accounting_year_id"]
             isOneToOne: false
             referencedRelation: "accounting_years"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
             referencedColumns: ["id"]
           },
           {
