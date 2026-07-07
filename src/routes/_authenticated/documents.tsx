@@ -92,6 +92,7 @@ function DocumentsPage() {
       document_date: row.document_date ?? "",
       comment: row.comment ?? "",
       year_scope: row.accounting_year_id ? "current" : "general",
+      case_id: row.case_id ?? null,
     });
 
     setFile(null);
