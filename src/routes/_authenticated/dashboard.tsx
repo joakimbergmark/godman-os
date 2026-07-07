@@ -4,12 +4,13 @@ import { useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Briefcase, AlertTriangle, Clock, Layers } from "lucide-react";
+import { Briefcase, AlertTriangle, Clock, Layers, ShieldCheck } from "lucide-react";
 import { useAccountingYear } from "@/lib/accounting-year";
 import {
   OPEN_STATUSES, LIFE_AREAS, lifeAreaLabel, statusLabel, priorityLabel,
   priorityClass, statusClass,
 } from "@/lib/cases";
+import { expiryTier, expiryTierClass, expiryTierLabel, daysUntil, obligationTypeLabel } from "@/lib/obligations";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   component: Dashboard,
@@ -62,6 +63,16 @@ function Dashboard() {
     },
   });
 
+  const { data: obligations = [] } = useQuery({
+    queryKey: ["dash-obligations", yearId],
+    enabled: !!yearId,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("obligations").select("*").eq("accounting_year_id", yearId!);
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const now = Date.now();
   const openCases = useMemo(() => cases.filter((c) => OPEN_STATUSES.includes(c.status as never)), [cases]);
   const staleCases = useMemo(() => openCases.filter((c) => {
@@ -79,6 +90,22 @@ function Dashboard() {
     return LIFE_AREAS.map((l) => ({ ...l, count: m[l.value] ?? 0 })).filter((l) => l.count > 0);
   }, [openCases]);
 
+  const expiring = useMemo(() => {
+    const rows = obligations
+      .map((o) => {
+        const ref = o.renewal_date ?? o.valid_until;
+        return { o, days: daysUntil(ref), tier: expiryTier(ref, o.status) };
+      })
+      .filter((r) => r.days !== null && r.days >= 0 && r.days <= 90 && r.o.status !== "expired" && r.o.status !== "cancelled" && r.o.status !== "completed")
+      .sort((a, b) => (a.days ?? 0) - (b.days ?? 0));
+    return {
+      d30: rows.filter((r) => (r.days ?? 0) < 30),
+      d60: rows.filter((r) => (r.days ?? 0) >= 30 && (r.days ?? 0) < 60),
+      d90: rows.filter((r) => (r.days ?? 0) >= 60 && (r.days ?? 0) <= 90),
+      all: rows,
+    };
+  }, [obligations]);
+
   return (
     <div className="space-y-6">
       <div>
@@ -93,6 +120,32 @@ function Dashboard() {
         <StatCard title="Utan aktivitet 30 dgr" value={staleCases.length} icon={<AlertTriangle className="h-4 w-4" />} to="/cases" />
         <StatCard title="Deadline inom 30 dgr" value={dueSoon.length} icon={<Clock className="h-4 w-4" />} to="/cases" />
       </div>
+
+      <Card>
+        <CardHeader><CardTitle className="text-base flex items-center gap-2"><ShieldCheck className="h-4 w-4" />Åtaganden som löper ut</CardTitle></CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-3">
+            <ExpiryBucket label="Inom 30 dagar" tone="red" count={expiring.d30.length} />
+            <ExpiryBucket label="Inom 60 dagar" tone="yellow" count={expiring.d60.length} />
+            <ExpiryBucket label="Inom 90 dagar" tone="green" count={expiring.d90.length} />
+          </div>
+          {expiring.all.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Inga åtaganden med förnyelse inom 90 dagar.</p>
+          ) : (
+            <div className="space-y-2">
+              {expiring.all.slice(0, 8).map(({ o, days, tier }) => (
+                <Link key={o.id} to="/obligations/$obligationId" params={{ obligationId: o.id }} className="flex items-center justify-between gap-2 text-sm border-b border-border/50 last:border-0 pb-2 last:pb-0 hover:text-primary">
+                  <div className="min-w-0">
+                    <div className="font-medium truncate">{o.title}</div>
+                    <div className="text-xs text-muted-foreground">{obligationTypeLabel(o.obligation_type)}</div>
+                  </div>
+                  <Badge variant="outline" className={expiryTierClass[tier]}>{expiryTierLabel(tier, days)}</Badge>
+                </Link>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
@@ -166,5 +219,19 @@ function StatCard({ title, value, icon, to }: { title: string; value: number; ic
         <Link to={to} className="text-xs text-primary hover:underline">Visa ärenden →</Link>
       </CardContent>
     </Card>
+  );
+}
+
+function ExpiryBucket({ label, tone, count }: { label: string; tone: "red" | "yellow" | "green"; count: number }) {
+  const toneClass = tone === "red"
+    ? "border-destructive/40 bg-destructive/10 text-destructive"
+    : tone === "yellow"
+    ? "border-amber-500/40 bg-amber-500/10 text-amber-600"
+    : "border-emerald-500/40 bg-emerald-500/10 text-emerald-600";
+  return (
+    <Link to="/obligations" className={`rounded-md border p-3 hover:opacity-90 ${toneClass}`}>
+      <div className="text-xs">{label}</div>
+      <div className="text-2xl font-semibold mt-1">{count}</div>
+    </Link>
   );
 }

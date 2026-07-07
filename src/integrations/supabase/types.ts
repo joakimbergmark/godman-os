@@ -402,6 +402,105 @@ export type Database = {
           },
         ]
       }
+      obligations: {
+        Row: {
+          accounting_year_id: string
+          authority_contact_id: string | null
+          case_id: string | null
+          created_at: string
+          decision_date: string | null
+          document_id: string | null
+          id: string
+          notes: string | null
+          obligation_type: string
+          owner_id: string
+          principal_id: string
+          reminder_days_before: number
+          renewal_date: string | null
+          status: string
+          title: string
+          updated_at: string
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          accounting_year_id: string
+          authority_contact_id?: string | null
+          case_id?: string | null
+          created_at?: string
+          decision_date?: string | null
+          document_id?: string | null
+          id?: string
+          notes?: string | null
+          obligation_type?: string
+          owner_id: string
+          principal_id: string
+          reminder_days_before?: number
+          renewal_date?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          accounting_year_id?: string
+          authority_contact_id?: string | null
+          case_id?: string | null
+          created_at?: string
+          decision_date?: string | null
+          document_id?: string | null
+          id?: string
+          notes?: string | null
+          obligation_type?: string
+          owner_id?: string
+          principal_id?: string
+          reminder_days_before?: number
+          renewal_date?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "obligations_accounting_year_id_fkey"
+            columns: ["accounting_year_id"]
+            isOneToOne: false
+            referencedRelation: "accounting_years"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "obligations_authority_contact_id_fkey"
+            columns: ["authority_contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "obligations_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "obligations_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "obligations_principal_id_fkey"
+            columns: ["principal_id"]
+            isOneToOne: false
+            referencedRelation: "principal"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       principal: {
         Row: {
           address: string | null

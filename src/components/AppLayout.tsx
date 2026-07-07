@@ -28,6 +28,7 @@ import {
   Coins,
   BookOpen,
   Briefcase,
+  ShieldCheck as ShieldCheckIcon,
 
 
 } from "lucide-react";
@@ -43,6 +44,7 @@ const items = [
   { title: "Översikt", url: "/dashboard", icon: LayoutDashboard },
   { title: "Tidslinje", url: "/timeline", icon: Clock },
   { title: "Ärenden", url: "/cases", icon: Briefcase },
+  { title: "Åtaganden", url: "/obligations", icon: ShieldCheckIcon },
   { title: "Huvudman", url: "/principal", icon: User },
   { title: "Kontakter", url: "/contacts", icon: Users },
   { title: "Aktiviteter", url: "/activities", icon: Activity },

@@ -16,6 +16,7 @@ import { Route as AuthenticatedYearOverviewRouteImport } from './routes/_authent
 import { Route as AuthenticatedTimelineRouteImport } from './routes/_authenticated/timeline'
 import { Route as AuthenticatedTasksRouteImport } from './routes/_authenticated/tasks'
 import { Route as AuthenticatedPrincipalRouteImport } from './routes/_authenticated/principal'
+import { Route as AuthenticatedObligationsRouteImport } from './routes/_authenticated/obligations'
 import { Route as AuthenticatedGuideRouteImport } from './routes/_authenticated/guide'
 import { Route as AuthenticatedEconomyRouteImport } from './routes/_authenticated/economy'
 import { Route as AuthenticatedDocumentsRouteImport } from './routes/_authenticated/documents'
@@ -24,6 +25,7 @@ import { Route as AuthenticatedContactsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedCasesRouteImport } from './routes/_authenticated/cases'
 import { Route as AuthenticatedActivitiesRouteImport } from './routes/_authenticated/activities'
 import { Route as AuthenticatedGuideIndexRouteImport } from './routes/_authenticated/guide.index'
+import { Route as AuthenticatedObligationsObligationIdRouteImport } from './routes/_authenticated/obligations.$obligationId'
 import { Route as AuthenticatedGuideVidareutvecklingRouteImport } from './routes/_authenticated/guide.vidareutveckling'
 import { Route as AuthenticatedGuideRedovisningsarRouteImport } from './routes/_authenticated/guide.redovisningsar'
 import { Route as AuthenticatedGuideModulerRouteImport } from './routes/_authenticated/guide.moduler'
@@ -67,6 +69,12 @@ const AuthenticatedPrincipalRoute = AuthenticatedPrincipalRouteImport.update({
   path: '/principal',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedObligationsRoute =
+  AuthenticatedObligationsRouteImport.update({
+    id: '/obligations',
+    path: '/obligations',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedGuideRoute = AuthenticatedGuideRouteImport.update({
   id: '/guide',
   path: '/guide',
@@ -107,6 +115,12 @@ const AuthenticatedGuideIndexRoute = AuthenticatedGuideIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedGuideRoute,
 } as any)
+const AuthenticatedObligationsObligationIdRoute =
+  AuthenticatedObligationsObligationIdRouteImport.update({
+    id: '/$obligationId',
+    path: '/$obligationId',
+    getParentRoute: () => AuthenticatedObligationsRoute,
+  } as any)
 const AuthenticatedGuideVidareutvecklingRoute =
   AuthenticatedGuideVidareutvecklingRouteImport.update({
     id: '/vidareutveckling',
@@ -160,6 +174,7 @@ export interface FileRoutesByFullPath {
   '/documents': typeof AuthenticatedDocumentsRoute
   '/economy': typeof AuthenticatedEconomyRoute
   '/guide': typeof AuthenticatedGuideRouteWithChildren
+  '/obligations': typeof AuthenticatedObligationsRouteWithChildren
   '/principal': typeof AuthenticatedPrincipalRoute
   '/tasks': typeof AuthenticatedTasksRoute
   '/timeline': typeof AuthenticatedTimelineRoute
@@ -171,6 +186,7 @@ export interface FileRoutesByFullPath {
   '/guide/moduler': typeof AuthenticatedGuideModulerRoute
   '/guide/redovisningsar': typeof AuthenticatedGuideRedovisningsarRoute
   '/guide/vidareutveckling': typeof AuthenticatedGuideVidareutvecklingRoute
+  '/obligations/$obligationId': typeof AuthenticatedObligationsObligationIdRoute
   '/guide/': typeof AuthenticatedGuideIndexRoute
 }
 export interface FileRoutesByTo {
@@ -182,6 +198,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/documents': typeof AuthenticatedDocumentsRoute
   '/economy': typeof AuthenticatedEconomyRoute
+  '/obligations': typeof AuthenticatedObligationsRouteWithChildren
   '/principal': typeof AuthenticatedPrincipalRoute
   '/tasks': typeof AuthenticatedTasksRoute
   '/timeline': typeof AuthenticatedTimelineRoute
@@ -193,6 +210,7 @@ export interface FileRoutesByTo {
   '/guide/moduler': typeof AuthenticatedGuideModulerRoute
   '/guide/redovisningsar': typeof AuthenticatedGuideRedovisningsarRoute
   '/guide/vidareutveckling': typeof AuthenticatedGuideVidareutvecklingRoute
+  '/obligations/$obligationId': typeof AuthenticatedObligationsObligationIdRoute
   '/guide': typeof AuthenticatedGuideIndexRoute
 }
 export interface FileRoutesById {
@@ -207,6 +225,7 @@ export interface FileRoutesById {
   '/_authenticated/documents': typeof AuthenticatedDocumentsRoute
   '/_authenticated/economy': typeof AuthenticatedEconomyRoute
   '/_authenticated/guide': typeof AuthenticatedGuideRouteWithChildren
+  '/_authenticated/obligations': typeof AuthenticatedObligationsRouteWithChildren
   '/_authenticated/principal': typeof AuthenticatedPrincipalRoute
   '/_authenticated/tasks': typeof AuthenticatedTasksRoute
   '/_authenticated/timeline': typeof AuthenticatedTimelineRoute
@@ -218,6 +237,7 @@ export interface FileRoutesById {
   '/_authenticated/guide/moduler': typeof AuthenticatedGuideModulerRoute
   '/_authenticated/guide/redovisningsar': typeof AuthenticatedGuideRedovisningsarRoute
   '/_authenticated/guide/vidareutveckling': typeof AuthenticatedGuideVidareutvecklingRoute
+  '/_authenticated/obligations/$obligationId': typeof AuthenticatedObligationsObligationIdRoute
   '/_authenticated/guide/': typeof AuthenticatedGuideIndexRoute
 }
 export interface FileRouteTypes {
@@ -232,6 +252,7 @@ export interface FileRouteTypes {
     | '/documents'
     | '/economy'
     | '/guide'
+    | '/obligations'
     | '/principal'
     | '/tasks'
     | '/timeline'
@@ -243,6 +264,7 @@ export interface FileRouteTypes {
     | '/guide/moduler'
     | '/guide/redovisningsar'
     | '/guide/vidareutveckling'
+    | '/obligations/$obligationId'
     | '/guide/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -254,6 +276,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/documents'
     | '/economy'
+    | '/obligations'
     | '/principal'
     | '/tasks'
     | '/timeline'
@@ -265,6 +288,7 @@ export interface FileRouteTypes {
     | '/guide/moduler'
     | '/guide/redovisningsar'
     | '/guide/vidareutveckling'
+    | '/obligations/$obligationId'
     | '/guide'
   id:
     | '__root__'
@@ -278,6 +302,7 @@ export interface FileRouteTypes {
     | '/_authenticated/documents'
     | '/_authenticated/economy'
     | '/_authenticated/guide'
+    | '/_authenticated/obligations'
     | '/_authenticated/principal'
     | '/_authenticated/tasks'
     | '/_authenticated/timeline'
@@ -289,6 +314,7 @@ export interface FileRouteTypes {
     | '/_authenticated/guide/moduler'
     | '/_authenticated/guide/redovisningsar'
     | '/_authenticated/guide/vidareutveckling'
+    | '/_authenticated/obligations/$obligationId'
     | '/_authenticated/guide/'
   fileRoutesById: FileRoutesById
 }
@@ -349,6 +375,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPrincipalRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/obligations': {
+      id: '/_authenticated/obligations'
+      path: '/obligations'
+      fullPath: '/obligations'
+      preLoaderRoute: typeof AuthenticatedObligationsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/guide': {
       id: '/_authenticated/guide'
       path: '/guide'
@@ -404,6 +437,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/guide/'
       preLoaderRoute: typeof AuthenticatedGuideIndexRouteImport
       parentRoute: typeof AuthenticatedGuideRoute
+    }
+    '/_authenticated/obligations/$obligationId': {
+      id: '/_authenticated/obligations/$obligationId'
+      path: '/$obligationId'
+      fullPath: '/obligations/$obligationId'
+      preLoaderRoute: typeof AuthenticatedObligationsObligationIdRouteImport
+      parentRoute: typeof AuthenticatedObligationsRoute
     }
     '/_authenticated/guide/vidareutveckling': {
       id: '/_authenticated/guide/vidareutveckling'
@@ -492,6 +532,21 @@ const AuthenticatedGuideRouteChildren: AuthenticatedGuideRouteChildren = {
 const AuthenticatedGuideRouteWithChildren =
   AuthenticatedGuideRoute._addFileChildren(AuthenticatedGuideRouteChildren)
 
+interface AuthenticatedObligationsRouteChildren {
+  AuthenticatedObligationsObligationIdRoute: typeof AuthenticatedObligationsObligationIdRoute
+}
+
+const AuthenticatedObligationsRouteChildren: AuthenticatedObligationsRouteChildren =
+  {
+    AuthenticatedObligationsObligationIdRoute:
+      AuthenticatedObligationsObligationIdRoute,
+  }
+
+const AuthenticatedObligationsRouteWithChildren =
+  AuthenticatedObligationsRoute._addFileChildren(
+    AuthenticatedObligationsRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedActivitiesRoute: typeof AuthenticatedActivitiesRoute
   AuthenticatedCasesRoute: typeof AuthenticatedCasesRouteWithChildren
@@ -500,6 +555,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDocumentsRoute: typeof AuthenticatedDocumentsRoute
   AuthenticatedEconomyRoute: typeof AuthenticatedEconomyRoute
   AuthenticatedGuideRoute: typeof AuthenticatedGuideRouteWithChildren
+  AuthenticatedObligationsRoute: typeof AuthenticatedObligationsRouteWithChildren
   AuthenticatedPrincipalRoute: typeof AuthenticatedPrincipalRoute
   AuthenticatedTasksRoute: typeof AuthenticatedTasksRoute
   AuthenticatedTimelineRoute: typeof AuthenticatedTimelineRoute
@@ -514,6 +570,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDocumentsRoute: AuthenticatedDocumentsRoute,
   AuthenticatedEconomyRoute: AuthenticatedEconomyRoute,
   AuthenticatedGuideRoute: AuthenticatedGuideRouteWithChildren,
+  AuthenticatedObligationsRoute: AuthenticatedObligationsRouteWithChildren,
   AuthenticatedPrincipalRoute: AuthenticatedPrincipalRoute,
   AuthenticatedTasksRoute: AuthenticatedTasksRoute,
   AuthenticatedTimelineRoute: AuthenticatedTimelineRoute,
