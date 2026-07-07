@@ -19,6 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Pencil, Plus, Trash2, Wallet, ArrowDownCircle, ArrowUpCircle, ArrowLeftRight } from "lucide-react";
 import { useAccountingYear } from "@/lib/accounting-year";
+import { CaseSelector } from "@/components/CaseSelector";
 
 export const Route = createFileRoute("/_authenticated/economy")({
   component: EconomyPage,
@@ -52,12 +53,13 @@ const txSchema = z.object({
   account_id: z.string().min(1, "Konto krävs"),
   counter_account_id: z.string().optional().or(z.literal("")),
   document_id: z.string().optional().or(z.literal("")),
+  case_id: z.string().nullable().optional(),
   comment: z.string().max(2000).optional().or(z.literal("")),
 });
 type TxForm = z.infer<typeof txSchema>;
 const emptyTx: TxForm = {
   transaction_date: today(), type: "expense", category_id: "", amount: "",
-  account_id: "", counter_account_id: "", document_id: "", comment: "",
+  account_id: "", counter_account_id: "", document_id: "", case_id: null, comment: "",
 };
 
 const ACCOUNT_TYPES = [
@@ -402,6 +404,7 @@ function Transactions({
       account_id: t.account_id,
       counter_account_id: t.counter_account_id ?? "",
       document_id: t.document_id ?? "",
+      case_id: t.case_id ?? null,
       comment: t.comment ?? "",
     });
     setOpen(true);
@@ -425,6 +428,7 @@ function Transactions({
       account_id: parsed.data.account_id,
       counter_account_id: parsed.data.type === "transfer" ? parsed.data.counter_account_id : null,
       document_id: parsed.data.document_id || null,
+      case_id: parsed.data.case_id || null,
       comment: parsed.data.comment || null,
     };
     const res = editing
@@ -565,6 +569,9 @@ function Transactions({
                     {documents.map((d) => <SelectItem key={d.id} value={d.id}>{d.title}</SelectItem>)}
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="sm:col-span-2">
+                <CaseSelector value={form.case_id ?? null} onChange={(v) => setForm({ ...form, case_id: v })} yearId={viewYearId ?? defaultYearId} />
               </div>
               <div className="space-y-1.5 sm:col-span-2">
                 <Label>Kommentar</Label>

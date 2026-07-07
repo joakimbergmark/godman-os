@@ -19,6 +19,7 @@ import {
 import { toast } from "sonner";
 import { Pencil, Plus, Search, Trash2, ArrowUpDown } from "lucide-react";
 import { useAccountingYear } from "@/lib/accounting-year";
+import { CaseSelector } from "@/components/CaseSelector";
 
 
 export const Route = createFileRoute("/_authenticated/tasks")({
@@ -38,9 +39,10 @@ const schema = z.object({
   deadline: z.string().optional().or(z.literal("")),
   priority: z.enum(["low", "medium", "high"]),
   status: z.enum(["open", "in_progress", "done"]),
+  case_id: z.string().nullable().optional(),
 });
 type Form = z.infer<typeof schema>;
-const empty: Form = { title: "", description: "", deadline: "", priority: "medium", status: "open" };
+const empty: Form = { title: "", description: "", deadline: "", priority: "medium", status: "open", case_id: null };
 
 function TasksPage() {
   const qc = useQueryClient();
@@ -94,6 +96,7 @@ function TasksPage() {
       deadline: row.deadline ?? "",
       priority: (row.priority as Form["priority"]) ?? "medium",
       status: (row.status as Form["status"]) ?? "open",
+      case_id: row.case_id ?? null,
     });
     setOpen(true);
   };
@@ -125,6 +128,7 @@ function TasksPage() {
       deadline: parsed.data.deadline || null,
       priority: parsed.data.priority,
       status: parsed.data.status,
+      case_id: parsed.data.case_id || null,
     };
     const res = editing
       ? await supabase.from("tasks").update(base).eq("id", editing)
@@ -204,6 +208,9 @@ function TasksPage() {
               <div className="space-y-1.5 sm:col-span-2">
                 <Label>Beskrivning</Label>
                 <Textarea rows={4} value={form.description ?? ""} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+              </div>
+              <div className="sm:col-span-2">
+                <CaseSelector value={form.case_id ?? null} onChange={(v) => setForm({ ...form, case_id: v })} yearId={yearId} />
               </div>
             </div>
             <DialogFooter><Button onClick={save}>{editing ? "Spara" : "Lägg till"}</Button></DialogFooter>

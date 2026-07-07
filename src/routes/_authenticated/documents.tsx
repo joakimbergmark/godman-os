@@ -18,6 +18,7 @@ import {
 import { toast } from "sonner";
 import { Download, Pencil, Plus, Search, Trash2, ArrowUpDown, FileText } from "lucide-react";
 import { useAccountingYear } from "@/lib/accounting-year";
+import { CaseSelector } from "@/components/CaseSelector";
 
 
 export const Route = createFileRoute("/_authenticated/documents")({
@@ -32,9 +33,10 @@ const metaSchema = z.object({
   document_date: z.string().optional().or(z.literal("")),
   comment: z.string().max(2000).optional().or(z.literal("")),
   year_scope: z.enum(["current", "general"]),
+  case_id: z.string().nullable().optional(),
 });
 type Meta = z.infer<typeof metaSchema>;
-const empty: Meta = { title: "", category: "", document_date: "", comment: "", year_scope: "current" };
+const empty: Meta = { title: "", category: "", document_date: "", comment: "", year_scope: "current", case_id: null };
 
 
 function DocumentsPage() {
@@ -90,6 +92,7 @@ function DocumentsPage() {
       document_date: row.document_date ?? "",
       comment: row.comment ?? "",
       year_scope: row.accounting_year_id ? "current" : "general",
+      case_id: row.case_id ?? null,
     });
 
     setFile(null);
@@ -117,6 +120,7 @@ function DocumentsPage() {
         document_date: parsed.data.document_date || null,
         comment: parsed.data.comment || null,
         accounting_year_id,
+        case_id: parsed.data.case_id || null,
       };
 
       if (editing) {
@@ -221,6 +225,9 @@ function DocumentsPage() {
               <div className="space-y-1.5 sm:col-span-2">
                 <Label>Kommentar</Label>
                 <Textarea rows={3} value={form.comment ?? ""} onChange={(e) => setForm({ ...form, comment: e.target.value })} />
+              </div>
+              <div className="sm:col-span-2">
+                <CaseSelector value={form.case_id ?? null} onChange={(v) => setForm({ ...form, case_id: v })} yearId={yearId} />
               </div>
 
               <div className="space-y-1.5 sm:col-span-2">

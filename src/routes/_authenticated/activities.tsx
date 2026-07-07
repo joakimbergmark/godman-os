@@ -18,6 +18,7 @@ import {
 import { toast } from "sonner";
 import { Pencil, Plus, Search, Trash2, ArrowUpDown } from "lucide-react";
 import { useAccountingYear } from "@/lib/accounting-year";
+import { CaseSelector } from "@/components/CaseSelector";
 
 
 export const Route = createFileRoute("/_authenticated/activities")({
@@ -33,10 +34,11 @@ const schema = z.object({
   description: z.string().max(4000).optional().or(z.literal("")),
   category: z.string().max(60).optional().or(z.literal("")),
   tags: z.string().max(300).optional().or(z.literal("")),
+  case_id: z.string().nullable().optional(),
 });
 type Form = z.infer<typeof schema>;
 const today = () => new Date().toISOString().slice(0, 10);
-const empty: Form = { activity_date: today(), title: "", description: "", category: "", tags: "" };
+const empty: Form = { activity_date: today(), title: "", description: "", category: "", tags: "", case_id: null };
 
 function ActivitiesPage() {
   const qc = useQueryClient();
@@ -88,6 +90,7 @@ function ActivitiesPage() {
       description: row.description ?? "",
       category: row.category ?? "",
       tags: (row.tags ?? []).join(", "),
+      case_id: row.case_id ?? null,
     });
     setOpen(true);
   };
@@ -121,6 +124,7 @@ function ActivitiesPage() {
       description: parsed.data.description || null,
       category: parsed.data.category || null,
       tags,
+      case_id: parsed.data.case_id || null,
     };
     const res = editing
       ? await supabase.from("activities").update(base).eq("id", editing)
@@ -182,6 +186,9 @@ function ActivitiesPage() {
               <div className="space-y-1.5 sm:col-span-2">
                 <Label>Taggar (kommaseparerade)</Label>
                 <Input value={form.tags ?? ""} onChange={(e) => setForm({ ...form, tags: e.target.value })} placeholder="t.ex. bank, försäkringskassan" />
+              </div>
+              <div className="sm:col-span-2">
+                <CaseSelector value={form.case_id ?? null} onChange={(v) => setForm({ ...form, case_id: v })} yearId={yearId} />
               </div>
             </div>
             <DialogFooter><Button onClick={save}>{editing ? "Spara" : "Lägg till"}</Button></DialogFooter>
