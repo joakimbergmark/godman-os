@@ -42,6 +42,7 @@ import { AccountingYearSelector } from "@/components/AccountingYearSelector";
 const items = [
   { title: "Översikt", url: "/dashboard", icon: LayoutDashboard },
   { title: "Tidslinje", url: "/timeline", icon: Clock },
+  { title: "Ärenden", url: "/cases", icon: Briefcase },
   { title: "Huvudman", url: "/principal", icon: User },
   { title: "Kontakter", url: "/contacts", icon: Users },
   { title: "Aktiviteter", url: "/activities", icon: Activity },
