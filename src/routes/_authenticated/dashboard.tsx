@@ -90,6 +90,22 @@ function Dashboard() {
     return LIFE_AREAS.map((l) => ({ ...l, count: m[l.value] ?? 0 })).filter((l) => l.count > 0);
   }, [openCases]);
 
+  const expiring = useMemo(() => {
+    const rows = obligations
+      .map((o) => {
+        const ref = o.renewal_date ?? o.valid_until;
+        return { o, days: daysUntil(ref), tier: expiryTier(ref, o.status) };
+      })
+      .filter((r) => r.days !== null && r.days >= 0 && r.days <= 90 && r.o.status !== "expired" && r.o.status !== "cancelled" && r.o.status !== "completed")
+      .sort((a, b) => (a.days ?? 0) - (b.days ?? 0));
+    return {
+      d30: rows.filter((r) => (r.days ?? 0) < 30),
+      d60: rows.filter((r) => (r.days ?? 0) >= 30 && (r.days ?? 0) < 60),
+      d90: rows.filter((r) => (r.days ?? 0) >= 60 && (r.days ?? 0) <= 90),
+      all: rows,
+    };
+  }, [obligations]);
+
   return (
     <div className="space-y-6">
       <div>
