@@ -209,6 +209,9 @@ function TasksPage() {
                 <Label>Beskrivning</Label>
                 <Textarea rows={4} value={form.description ?? ""} onChange={(e) => setForm({ ...form, description: e.target.value })} />
               </div>
+              <div className="sm:col-span-2">
+                <CaseSelector value={form.case_id ?? null} onChange={(v) => setForm({ ...form, case_id: v })} yearId={yearId} />
+              </div>
             </div>
             <DialogFooter><Button onClick={save}>{editing ? "Spara" : "Lägg till"}</Button></DialogFooter>
           </DialogContent>
