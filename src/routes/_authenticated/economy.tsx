@@ -53,12 +53,13 @@ const txSchema = z.object({
   account_id: z.string().min(1, "Konto krävs"),
   counter_account_id: z.string().optional().or(z.literal("")),
   document_id: z.string().optional().or(z.literal("")),
+  case_id: z.string().nullable().optional(),
   comment: z.string().max(2000).optional().or(z.literal("")),
 });
 type TxForm = z.infer<typeof txSchema>;
 const emptyTx: TxForm = {
   transaction_date: today(), type: "expense", category_id: "", amount: "",
-  account_id: "", counter_account_id: "", document_id: "", comment: "",
+  account_id: "", counter_account_id: "", document_id: "", case_id: null, comment: "",
 };
 
 const ACCOUNT_TYPES = [
