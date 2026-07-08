@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Pencil, Plus, Trash2, Wallet, ArrowDownCircle, ArrowUpCircle, ArrowLeftRight } from "lucide-react";
+import { Pencil, Plus, Trash2, Wallet, ArrowDownCircle, ArrowUpCircle, ArrowLeftRight, Upload } from "lucide-react";
 import { useAccountingYear } from "@/lib/accounting-year";
 import { CaseSelector } from "@/components/CaseSelector";
 import { ImportTransactionsDialog } from "@/components/economy/ImportTransactionsDialog";
