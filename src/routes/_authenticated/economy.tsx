@@ -17,9 +17,10 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Pencil, Plus, Trash2, Wallet, ArrowDownCircle, ArrowUpCircle, ArrowLeftRight } from "lucide-react";
+import { Pencil, Plus, Trash2, Wallet, ArrowDownCircle, ArrowUpCircle, ArrowLeftRight, Upload } from "lucide-react";
 import { useAccountingYear } from "@/lib/accounting-year";
 import { CaseSelector } from "@/components/CaseSelector";
+import { ImportTransactionsDialog } from "@/components/economy/ImportTransactionsDialog";
 
 export const Route = createFileRoute("/_authenticated/economy")({
   component: EconomyPage,
@@ -339,6 +340,7 @@ function Transactions({
   const [sortKey, setSortKey] = useState<"date_desc" | "date_asc" | "amount_desc" | "amount_asc">("date_desc");
   const [newCatOpen, setNewCatOpen] = useState(false);
   const [newCat, setNewCat] = useState<{ name: string; kind: "income" | "expense" }>({ name: "", kind: "expense" });
+  const [importOpen, setImportOpen] = useState(false);
 
   const { data: accounts = [] } = useQuery({
     queryKey: ["accounts", principalId],
@@ -499,12 +501,16 @@ function Transactions({
             </SelectContent>
           </Select>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={openNew} disabled={accounts.length === 0}>
-              <Plus className="h-4 w-4 mr-1" /> Ny transaktion
-            </Button>
-          </DialogTrigger>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setImportOpen(true)} disabled={accounts.length === 0}>
+            <Upload className="h-4 w-4 mr-1" /> Ladda upp transaktioner
+          </Button>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={openNew} disabled={accounts.length === 0}>
+                <Plus className="h-4 w-4 mr-1" /> Ny transaktion
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-lg">
             <DialogHeader><DialogTitle>{editing ? "Redigera transaktion" : "Ny transaktion"}</DialogTitle></DialogHeader>
             <div className="grid gap-3 sm:grid-cols-2">
@@ -581,7 +587,16 @@ function Transactions({
             <DialogFooter><Button onClick={save}>{editing ? "Spara" : "Registrera"}</Button></DialogFooter>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
+
+      <ImportTransactionsDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        accounts={accounts}
+        principalId={principalId}
+        accountingYearId={viewYearId ?? defaultYearId}
+      />
 
       <Dialog open={newCatOpen} onOpenChange={setNewCatOpen}>
         <DialogContent className="max-w-sm">

@@ -1,21 +1,40 @@
-## Problem
+# Ladda upp transaktioner via bild
 
-`src/routes/_authenticated/cases.tsx` är både lista OCH förälder till `cases.$caseId.tsx`. Eftersom `CasesPage` inte renderar `<Outlet />` mountas aldrig detaljsidan — klick på ett kort verkar bara ladda om listan. Redigera/ta bort finns redan i detaljsidan (`CaseHeader`), men blir onåbar.
+Ny knapp **"Ladda upp transaktioner"** till vänster om *Ny transaktion* på fliken *Transaktioner*. Öppnar dialog där huvudmannen väljer konto, laddar upp en skärmbild från internetbanken, får raderna tolkade av Lovable AI, granskar och sparar. Dubbletter blockeras.
 
-Detta är den dokumenterade fallgropen i TanStack Start: när en route har barn måste dess komponent rendera `<Outlet />`, annars visas ingenting.
+## Flöde
 
-## Åtgärd
+1. Användaren klickar knappen → dialog öppnas.
+2. Väljer **konto** (obligatoriskt) och laddar upp en bild (PNG/JPG/WebP, max ~8 MB).
+3. Klick **Tolka bild** → bilden skickas som base64 till server function `parseBankScreenshot` som kallar Lovable AI (`google/gemini-2.5-flash`, multimodal) och får tillbaka strukturerad JSON: `{ rows: [{ date, description, amount, type: "income"|"expense" }] }`.
+4. Raderna visas i en tabell där varje rad kan redigeras (datum, typ, belopp, kommentar, kategori) eller avmarkeras. En dubblettflagga visas för rader som matchar befintlig transaktion.
+5. Klick **Spara valda** → infogar markerade, ej dubbletter, transaktioner. Toast med antal sparade + antal hoppade över.
 
-1. **Byt namn** `src/routes/_authenticated/cases.tsx` → `src/routes/_authenticated/cases.index.tsx` (URL `/cases` — listan flyttas hit oförändrad).
-2. **Skapa** `src/routes/_authenticated/cases.tsx` som en tunn layout:
-   ```tsx
-   export const Route = createFileRoute("/_authenticated/cases")({
-     component: () => <Outlet />,
-   });
-   ```
-3. Detaljsidan `cases.$caseId.tsx` lämnas orörd — den innehåller redan:
-   - Alla relationer (aktiviteter, uppgifter, dokument, transaktioner, beslut, tidslinje).
-   - Redigera-dialog via `CaseHeader` med alla fält (titel, status, prioritet, datum, myndighetskontakt, anteckningar).
-   - Ta bort-knapp.
+## Dubbletthantering
 
-Ingen datamodell, ingen RLS, inget UI utöver detta ändras. Efter fixen fungerar både "öppna ärende" och "redigera ärende".
+En transaktion räknas som dubblett om det redan finns en rad för samma `principal_id`, `account_id`, `transaction_date`, `type` och `amount` (belopp i öre). Kontrollen görs i två lager:
+
+- **Klientvarning** vid granskning: hämtar befintliga transaktioner för kontot ± 7 dagar och flaggar matchning i UI så användaren ser vad som hoppas över.
+- **Server-side guard** i server function före insert: filtrerar bort rader som redan matchar i databasen (skydd mot race/omtolkad bild).
+
+Ingen unik index-ändring görs — matchningen bygger på identiska värden och håller strategin flexibel om t ex kommentar skiljer.
+
+## Filer
+
+- **Ny**: `src/lib/parse-bank-screenshot.functions.ts` — `createServerFn` med `requireSupabaseAuth`. Tar `{ imageBase64, mimeType }`, kallar Lovable AI Gateway (via helper från `ai-sdk-lovable-gateway`), returnerar `{ rows }`. Strikt Zod-schema; om AI returnerar tomt/ogiltigt → tomt resultat + felmeddelande.
+- **Ny**: `src/lib/ai-gateway.server.ts` (om saknas) — provider-helper enligt kunskapsdokument.
+- **Ny**: `src/components/economy/ImportTransactionsDialog.tsx` — dialogen (uppladdning, tolkning, granskningstabell, spara).
+- **Redigerad**: `src/routes/_authenticated/economy.tsx` — importera dialogen och lägg knappen till vänster om *Ny transaktion*.
+
+## AI-prompt (sammanfattning)
+
+System: "Du tolkar svenska bankkontoutdrag från skärmbilder. Extrahera varje synlig transaktionsrad. Returnera JSON enligt schemat. Datum i ISO (YYYY-MM-DD). Belopp positivt tal. `type` = `expense` om uttag/betalning, `income` om insättning. Ignorera saldorader och rubriker."
+
+Structured output via `generateText({ output: Output.object({ schema }) })` med `{ structuredOutputs: true }` på providern.
+
+## Avgränsningar
+
+- Endast bilder i denna iteration (ingen PDF/CSV).
+- Kategori sätts inte automatiskt — användaren kan välja per rad i granskningen.
+- Dokumentkoppling (bilaga) ingår inte — kan läggas till senare.
+- Ingen ny databasändring krävs.
