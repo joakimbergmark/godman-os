@@ -151,7 +151,17 @@ export function ImportTransactionsDialog({
         (existing ?? []).map((e) => `${e.transaction_date}|${e.type}|${Math.round(Number(e.amount) * 100)}`),
       );
 
-      const toInsert: Array<Record<string, unknown>> = [];
+      type InsertRow = {
+        owner_id: string;
+        principal_id: string;
+        accounting_year_id: string;
+        account_id: string;
+        transaction_date: string;
+        type: "income" | "expense";
+        amount: number;
+        comment: string | null;
+      };
+      const toInsert: InsertRow[] = [];
       let skipped = 0;
       const batchSet = new Set<string>();
       for (const r of selectedRows) {
