@@ -23,7 +23,7 @@ import {
   lifeAreaLabel, statusLabel, priorityLabel, priorityClass, statusClass,
 } from "@/lib/cases";
 
-export const Route = createFileRoute("/_authenticated/cases")({
+export const Route = createFileRoute("/_authenticated/cases/")({
   component: CasesPage,
 });
 

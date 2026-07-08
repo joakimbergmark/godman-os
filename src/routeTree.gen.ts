@@ -22,9 +22,9 @@ import { Route as AuthenticatedEconomyRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedDocumentsRouteImport } from './routes/_authenticated/documents'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedContactsRouteImport } from './routes/_authenticated/contacts'
-import { Route as AuthenticatedCasesRouteImport } from './routes/_authenticated/cases'
 import { Route as AuthenticatedActivitiesRouteImport } from './routes/_authenticated/activities'
 import { Route as AuthenticatedGuideIndexRouteImport } from './routes/_authenticated/guide.index'
+import { Route as AuthenticatedCasesIndexRouteImport } from './routes/_authenticated/cases.index'
 import { Route as AuthenticatedObligationsObligationIdRouteImport } from './routes/_authenticated/obligations.$obligationId'
 import { Route as AuthenticatedGuideVidareutvecklingRouteImport } from './routes/_authenticated/guide.vidareutveckling'
 import { Route as AuthenticatedGuideRedovisningsarRouteImport } from './routes/_authenticated/guide.redovisningsar'
@@ -100,11 +100,6 @@ const AuthenticatedContactsRoute = AuthenticatedContactsRouteImport.update({
   path: '/contacts',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedCasesRoute = AuthenticatedCasesRouteImport.update({
-  id: '/cases',
-  path: '/cases',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedActivitiesRoute = AuthenticatedActivitiesRouteImport.update({
   id: '/activities',
   path: '/activities',
@@ -114,6 +109,11 @@ const AuthenticatedGuideIndexRoute = AuthenticatedGuideIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AuthenticatedGuideRoute,
+} as any)
+const AuthenticatedCasesIndexRoute = AuthenticatedCasesIndexRouteImport.update({
+  id: '/cases/',
+  path: '/cases/',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedObligationsObligationIdRoute =
   AuthenticatedObligationsObligationIdRouteImport.update({
@@ -159,16 +159,15 @@ const AuthenticatedGuideArbetsflodeRoute =
   } as any)
 const AuthenticatedCasesCaseIdRoute =
   AuthenticatedCasesCaseIdRouteImport.update({
-    id: '/$caseId',
-    path: '/$caseId',
-    getParentRoute: () => AuthenticatedCasesRoute,
+    id: '/cases/$caseId',
+    path: '/cases/$caseId',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/activities': typeof AuthenticatedActivitiesRoute
-  '/cases': typeof AuthenticatedCasesRouteWithChildren
   '/contacts': typeof AuthenticatedContactsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/documents': typeof AuthenticatedDocumentsRoute
@@ -187,13 +186,13 @@ export interface FileRoutesByFullPath {
   '/guide/redovisningsar': typeof AuthenticatedGuideRedovisningsarRoute
   '/guide/vidareutveckling': typeof AuthenticatedGuideVidareutvecklingRoute
   '/obligations/$obligationId': typeof AuthenticatedObligationsObligationIdRoute
+  '/cases/': typeof AuthenticatedCasesIndexRoute
   '/guide/': typeof AuthenticatedGuideIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/activities': typeof AuthenticatedActivitiesRoute
-  '/cases': typeof AuthenticatedCasesRouteWithChildren
   '/contacts': typeof AuthenticatedContactsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/documents': typeof AuthenticatedDocumentsRoute
@@ -211,6 +210,7 @@ export interface FileRoutesByTo {
   '/guide/redovisningsar': typeof AuthenticatedGuideRedovisningsarRoute
   '/guide/vidareutveckling': typeof AuthenticatedGuideVidareutvecklingRoute
   '/obligations/$obligationId': typeof AuthenticatedObligationsObligationIdRoute
+  '/cases': typeof AuthenticatedCasesIndexRoute
   '/guide': typeof AuthenticatedGuideIndexRoute
 }
 export interface FileRoutesById {
@@ -219,7 +219,6 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/activities': typeof AuthenticatedActivitiesRoute
-  '/_authenticated/cases': typeof AuthenticatedCasesRouteWithChildren
   '/_authenticated/contacts': typeof AuthenticatedContactsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/documents': typeof AuthenticatedDocumentsRoute
@@ -238,6 +237,7 @@ export interface FileRoutesById {
   '/_authenticated/guide/redovisningsar': typeof AuthenticatedGuideRedovisningsarRoute
   '/_authenticated/guide/vidareutveckling': typeof AuthenticatedGuideVidareutvecklingRoute
   '/_authenticated/obligations/$obligationId': typeof AuthenticatedObligationsObligationIdRoute
+  '/_authenticated/cases/': typeof AuthenticatedCasesIndexRoute
   '/_authenticated/guide/': typeof AuthenticatedGuideIndexRoute
 }
 export interface FileRouteTypes {
@@ -246,7 +246,6 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/activities'
-    | '/cases'
     | '/contacts'
     | '/dashboard'
     | '/documents'
@@ -265,13 +264,13 @@ export interface FileRouteTypes {
     | '/guide/redovisningsar'
     | '/guide/vidareutveckling'
     | '/obligations/$obligationId'
+    | '/cases/'
     | '/guide/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/activities'
-    | '/cases'
     | '/contacts'
     | '/dashboard'
     | '/documents'
@@ -289,6 +288,7 @@ export interface FileRouteTypes {
     | '/guide/redovisningsar'
     | '/guide/vidareutveckling'
     | '/obligations/$obligationId'
+    | '/cases'
     | '/guide'
   id:
     | '__root__'
@@ -296,7 +296,6 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/activities'
-    | '/_authenticated/cases'
     | '/_authenticated/contacts'
     | '/_authenticated/dashboard'
     | '/_authenticated/documents'
@@ -315,6 +314,7 @@ export interface FileRouteTypes {
     | '/_authenticated/guide/redovisningsar'
     | '/_authenticated/guide/vidareutveckling'
     | '/_authenticated/obligations/$obligationId'
+    | '/_authenticated/cases/'
     | '/_authenticated/guide/'
   fileRoutesById: FileRoutesById
 }
@@ -417,13 +417,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedContactsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/cases': {
-      id: '/_authenticated/cases'
-      path: '/cases'
-      fullPath: '/cases'
-      preLoaderRoute: typeof AuthenticatedCasesRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/activities': {
       id: '/_authenticated/activities'
       path: '/activities'
@@ -437,6 +430,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/guide/'
       preLoaderRoute: typeof AuthenticatedGuideIndexRouteImport
       parentRoute: typeof AuthenticatedGuideRoute
+    }
+    '/_authenticated/cases/': {
+      id: '/_authenticated/cases/'
+      path: '/cases'
+      fullPath: '/cases/'
+      preLoaderRoute: typeof AuthenticatedCasesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/obligations/$obligationId': {
       id: '/_authenticated/obligations/$obligationId'
@@ -489,24 +489,13 @@ declare module '@tanstack/react-router' {
     }
     '/_authenticated/cases/$caseId': {
       id: '/_authenticated/cases/$caseId'
-      path: '/$caseId'
+      path: '/cases/$caseId'
       fullPath: '/cases/$caseId'
       preLoaderRoute: typeof AuthenticatedCasesCaseIdRouteImport
-      parentRoute: typeof AuthenticatedCasesRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
-
-interface AuthenticatedCasesRouteChildren {
-  AuthenticatedCasesCaseIdRoute: typeof AuthenticatedCasesCaseIdRoute
-}
-
-const AuthenticatedCasesRouteChildren: AuthenticatedCasesRouteChildren = {
-  AuthenticatedCasesCaseIdRoute: AuthenticatedCasesCaseIdRoute,
-}
-
-const AuthenticatedCasesRouteWithChildren =
-  AuthenticatedCasesRoute._addFileChildren(AuthenticatedCasesRouteChildren)
 
 interface AuthenticatedGuideRouteChildren {
   AuthenticatedGuideArbetsflodeRoute: typeof AuthenticatedGuideArbetsflodeRoute
@@ -549,7 +538,6 @@ const AuthenticatedObligationsRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedActivitiesRoute: typeof AuthenticatedActivitiesRoute
-  AuthenticatedCasesRoute: typeof AuthenticatedCasesRouteWithChildren
   AuthenticatedContactsRoute: typeof AuthenticatedContactsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDocumentsRoute: typeof AuthenticatedDocumentsRoute
@@ -560,11 +548,12 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedTasksRoute: typeof AuthenticatedTasksRoute
   AuthenticatedTimelineRoute: typeof AuthenticatedTimelineRoute
   AuthenticatedYearOverviewRoute: typeof AuthenticatedYearOverviewRoute
+  AuthenticatedCasesCaseIdRoute: typeof AuthenticatedCasesCaseIdRoute
+  AuthenticatedCasesIndexRoute: typeof AuthenticatedCasesIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedActivitiesRoute: AuthenticatedActivitiesRoute,
-  AuthenticatedCasesRoute: AuthenticatedCasesRouteWithChildren,
   AuthenticatedContactsRoute: AuthenticatedContactsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDocumentsRoute: AuthenticatedDocumentsRoute,
@@ -575,6 +564,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedTasksRoute: AuthenticatedTasksRoute,
   AuthenticatedTimelineRoute: AuthenticatedTimelineRoute,
   AuthenticatedYearOverviewRoute: AuthenticatedYearOverviewRoute,
+  AuthenticatedCasesCaseIdRoute: AuthenticatedCasesCaseIdRoute,
+  AuthenticatedCasesIndexRoute: AuthenticatedCasesIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -588,13 +579,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
