@@ -501,12 +501,16 @@ function Transactions({
             </SelectContent>
           </Select>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={openNew} disabled={accounts.length === 0}>
-              <Plus className="h-4 w-4 mr-1" /> Ny transaktion
-            </Button>
-          </DialogTrigger>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setImportOpen(true)} disabled={accounts.length === 0}>
+            <Upload className="h-4 w-4 mr-1" /> Ladda upp transaktioner
+          </Button>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={openNew} disabled={accounts.length === 0}>
+                <Plus className="h-4 w-4 mr-1" /> Ny transaktion
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-lg">
             <DialogHeader><DialogTitle>{editing ? "Redigera transaktion" : "Ny transaktion"}</DialogTitle></DialogHeader>
             <div className="grid gap-3 sm:grid-cols-2">
