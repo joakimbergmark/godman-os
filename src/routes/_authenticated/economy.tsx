@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { Pencil, Plus, Trash2, Wallet, ArrowDownCircle, ArrowUpCircle, ArrowLeftRight } from "lucide-react";
 import { useAccountingYear } from "@/lib/accounting-year";
 import { CaseSelector } from "@/components/CaseSelector";
+import { ImportTransactionsDialog } from "@/components/economy/ImportTransactionsDialog";
 
 export const Route = createFileRoute("/_authenticated/economy")({
   component: EconomyPage,
