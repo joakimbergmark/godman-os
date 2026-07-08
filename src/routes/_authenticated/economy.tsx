@@ -340,6 +340,7 @@ function Transactions({
   const [sortKey, setSortKey] = useState<"date_desc" | "date_asc" | "amount_desc" | "amount_asc">("date_desc");
   const [newCatOpen, setNewCatOpen] = useState(false);
   const [newCat, setNewCat] = useState<{ name: string; kind: "income" | "expense" }>({ name: "", kind: "expense" });
+  const [importOpen, setImportOpen] = useState(false);
 
   const { data: accounts = [] } = useQuery({
     queryKey: ["accounts", principalId],
