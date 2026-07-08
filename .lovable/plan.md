@@ -1,22 +1,21 @@
-ions## Mål
+## Problem
 
-Skapa `docs/DATA_MODEL.md` — en läsbar beskrivning av nuvarande datamodell (public-schemat) som du kan exportera/dela.
+`src/routes/_authenticated/cases.tsx` är både lista OCH förälder till `cases.$caseId.tsx`. Eftersom `CasesPage` inte renderar `<Outlet />` mountas aldrig detaljsidan — klick på ett kort verkar bara ladda om listan. Redigera/ta bort finns redan i detaljsidan (`CaseHeader`), men blir onåbar.
 
-## Innehåll
+Detta är den dokumenterade fallgropen i TanStack Start: när en route har barn måste dess komponent rendera `<Outlet />`, annars visas ingenting.
 
-1. **Översikt** — kort beskrivning + Mermaid ER-diagram över alla 12 tabeller och deras relationer.
-2. **En sektion per tabell** (accounting_years, accounts, activities, case_decisions, cases, contacts, documents, obligations, principal, tasks, transaction_categories, transactions) med:
-   - Kort beskrivning av entitetens roll (kopplad till ARCHITECTURE.md).
-   - Kolumntabell: namn, typ, nullbar, default, kommentar (FK-referens där relevant).
-3. **Relationsöversikt** — lista över främmande nycklar (härledda från kolumnnamn, t.ex. `principal_id → principal.id`, `case_id → cases.id`).
+## Åtgärd
 
-## Avgränsning
+1. **Byt namn** `src/routes/_authenticated/cases.tsx` → `src/routes/_authenticated/cases.index.tsx` (URL `/cases` — listan flyttas hit oförändrad).
+2. **Skapa** `src/routes/_authenticated/cases.tsx` som en tunn layout:
+   ```tsx
+   export const Route = createFileRoute("/_authenticated/cases")({
+     component: () => <Outlet />,
+   });
+   ```
+3. Detaljsidan `cases.$caseId.tsx` lämnas orörd — den innehåller redan:
+   - Alla relationer (aktiviteter, uppgifter, dokument, transaktioner, beslut, tidslinje).
+   - Redigera-dialog via `CaseHeader` med alla fält (titel, status, prioritet, datum, myndighetskontakt, anteckningar).
+   - Ta bort-knapp.
 
-- Endast struktur (kolumner + relationer). RLS, policies, triggers, funktioner och index utelämnas enligt ditt val.
-- Dokumentet genereras utifrån aktuell schemadata jag redan hämtat från databasen.
-
-## Leverabel
-
-- Ny fil: `docs/DATA_MODEL.md`
-
-Du kan sedan öppna filen och kopiera/exportera vidare (Markdown renderas på GitHub, i editorer, eller kan konverteras till PDF).
+Ingen datamodell, ingen RLS, inget UI utöver detta ändras. Efter fixen fungerar både "öppna ärende" och "redigera ärende".
