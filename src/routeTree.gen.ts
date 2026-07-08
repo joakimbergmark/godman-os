@@ -25,6 +25,7 @@ import { Route as AuthenticatedContactsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedCasesRouteImport } from './routes/_authenticated/cases'
 import { Route as AuthenticatedActivitiesRouteImport } from './routes/_authenticated/activities'
 import { Route as AuthenticatedGuideIndexRouteImport } from './routes/_authenticated/guide.index'
+import { Route as AuthenticatedCasesIndexRouteImport } from './routes/_authenticated/cases.index'
 import { Route as AuthenticatedObligationsObligationIdRouteImport } from './routes/_authenticated/obligations.$obligationId'
 import { Route as AuthenticatedGuideVidareutvecklingRouteImport } from './routes/_authenticated/guide.vidareutveckling'
 import { Route as AuthenticatedGuideRedovisningsarRouteImport } from './routes/_authenticated/guide.redovisningsar'
@@ -115,6 +116,11 @@ const AuthenticatedGuideIndexRoute = AuthenticatedGuideIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedGuideRoute,
 } as any)
+const AuthenticatedCasesIndexRoute = AuthenticatedCasesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedCasesRoute,
+} as any)
 const AuthenticatedObligationsObligationIdRoute =
   AuthenticatedObligationsObligationIdRouteImport.update({
     id: '/$obligationId',
@@ -187,13 +193,13 @@ export interface FileRoutesByFullPath {
   '/guide/redovisningsar': typeof AuthenticatedGuideRedovisningsarRoute
   '/guide/vidareutveckling': typeof AuthenticatedGuideVidareutvecklingRoute
   '/obligations/$obligationId': typeof AuthenticatedObligationsObligationIdRoute
+  '/cases/': typeof AuthenticatedCasesIndexRoute
   '/guide/': typeof AuthenticatedGuideIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/activities': typeof AuthenticatedActivitiesRoute
-  '/cases': typeof AuthenticatedCasesRouteWithChildren
   '/contacts': typeof AuthenticatedContactsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/documents': typeof AuthenticatedDocumentsRoute
@@ -211,6 +217,7 @@ export interface FileRoutesByTo {
   '/guide/redovisningsar': typeof AuthenticatedGuideRedovisningsarRoute
   '/guide/vidareutveckling': typeof AuthenticatedGuideVidareutvecklingRoute
   '/obligations/$obligationId': typeof AuthenticatedObligationsObligationIdRoute
+  '/cases': typeof AuthenticatedCasesIndexRoute
   '/guide': typeof AuthenticatedGuideIndexRoute
 }
 export interface FileRoutesById {
@@ -238,6 +245,7 @@ export interface FileRoutesById {
   '/_authenticated/guide/redovisningsar': typeof AuthenticatedGuideRedovisningsarRoute
   '/_authenticated/guide/vidareutveckling': typeof AuthenticatedGuideVidareutvecklingRoute
   '/_authenticated/obligations/$obligationId': typeof AuthenticatedObligationsObligationIdRoute
+  '/_authenticated/cases/': typeof AuthenticatedCasesIndexRoute
   '/_authenticated/guide/': typeof AuthenticatedGuideIndexRoute
 }
 export interface FileRouteTypes {
@@ -265,13 +273,13 @@ export interface FileRouteTypes {
     | '/guide/redovisningsar'
     | '/guide/vidareutveckling'
     | '/obligations/$obligationId'
+    | '/cases/'
     | '/guide/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/activities'
-    | '/cases'
     | '/contacts'
     | '/dashboard'
     | '/documents'
@@ -289,6 +297,7 @@ export interface FileRouteTypes {
     | '/guide/redovisningsar'
     | '/guide/vidareutveckling'
     | '/obligations/$obligationId'
+    | '/cases'
     | '/guide'
   id:
     | '__root__'
@@ -315,6 +324,7 @@ export interface FileRouteTypes {
     | '/_authenticated/guide/redovisningsar'
     | '/_authenticated/guide/vidareutveckling'
     | '/_authenticated/obligations/$obligationId'
+    | '/_authenticated/cases/'
     | '/_authenticated/guide/'
   fileRoutesById: FileRoutesById
 }
@@ -438,6 +448,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedGuideIndexRouteImport
       parentRoute: typeof AuthenticatedGuideRoute
     }
+    '/_authenticated/cases/': {
+      id: '/_authenticated/cases/'
+      path: '/'
+      fullPath: '/cases/'
+      preLoaderRoute: typeof AuthenticatedCasesIndexRouteImport
+      parentRoute: typeof AuthenticatedCasesRoute
+    }
     '/_authenticated/obligations/$obligationId': {
       id: '/_authenticated/obligations/$obligationId'
       path: '/$obligationId'
@@ -499,10 +516,12 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedCasesRouteChildren {
   AuthenticatedCasesCaseIdRoute: typeof AuthenticatedCasesCaseIdRoute
+  AuthenticatedCasesIndexRoute: typeof AuthenticatedCasesIndexRoute
 }
 
 const AuthenticatedCasesRouteChildren: AuthenticatedCasesRouteChildren = {
   AuthenticatedCasesCaseIdRoute: AuthenticatedCasesCaseIdRoute,
+  AuthenticatedCasesIndexRoute: AuthenticatedCasesIndexRoute,
 }
 
 const AuthenticatedCasesRouteWithChildren =
@@ -588,13 +607,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
