@@ -587,7 +587,16 @@ function Transactions({
             <DialogFooter><Button onClick={save}>{editing ? "Spara" : "Registrera"}</Button></DialogFooter>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
+
+      <ImportTransactionsDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        accounts={accounts}
+        principalId={principalId}
+        accountingYearId={viewYearId ?? defaultYearId}
+      />
 
       <Dialog open={newCatOpen} onOpenChange={setNewCatOpen}>
         <DialogContent className="max-w-sm">
