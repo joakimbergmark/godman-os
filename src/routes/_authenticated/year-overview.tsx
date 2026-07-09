@@ -12,6 +12,9 @@ import {
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 
+const fmt = (n: number) =>
+  new Intl.NumberFormat("sv-SE", { style: "currency", currency: "SEK", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
+
 export const Route = createFileRoute("/_authenticated/year-overview")({
   component: YearOverviewPage,
 });
