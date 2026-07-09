@@ -301,7 +301,7 @@ function Accounts({ principalId }: { principalId: string }) {
                   </div>
                   <div className="mt-3">
                     <div className="text-xs text-muted-foreground">Saldo</div>
-                    <div className="text-xl font-semibold">{fmt(balances[a.id] ?? Number(a.opening_balance))}</div>
+                    <div className="text-xl font-semibold">{fmt(Number.isFinite(balances[a.id]) ? balances[a.id] : toNum(a.opening_balance))}</div>
                   </div>
                 </div>
                 <div className="flex gap-1 shrink-0">
