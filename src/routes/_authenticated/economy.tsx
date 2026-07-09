@@ -398,6 +398,7 @@ function Transactions({
   const accountName = (id: string | null) => accounts.find((a) => a.id === id)?.name ?? "—";
   const categoryName = (id: string | null) => categories.find((c) => c.id === id)?.name ?? "";
   const docTitle = (id: string | null) => documents.find((d) => d.id === id)?.title ?? "";
+  const caseTitle = (id: string | null) => cases.find((k) => k.id === id)?.title ?? "";
 
   const openNew = () => {
     setEditing(null);
