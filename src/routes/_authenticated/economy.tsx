@@ -360,6 +360,14 @@ function Transactions({
       return data;
     },
   });
+  const { data: cases = [] } = useQuery({
+    queryKey: ["cases-lite", principalId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("cases").select("id,title").eq("principal_id", principalId).order("title");
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const { data: txs = [] } = useQuery({
     queryKey: ["transactions", viewYearId ?? "all", principalId],
