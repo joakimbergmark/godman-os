@@ -685,6 +685,8 @@ function Transactions({
 
 // ---------- Overview ----------
 function Overview({ viewYearId }: { viewYearId: string | null }) {
+  const { principalId } = useAccountingYear();
+
   const { data: txs = [] } = useQuery({
     queryKey: ["transactions-overview", viewYearId ?? "all"],
     queryFn: async () => {
@@ -696,6 +698,41 @@ function Overview({ viewYearId }: { viewYearId: string | null }) {
     },
   });
   const { data: categories = [] } = useCategories();
+
+  const { data: accounts = [] } = useQuery({
+    queryKey: ["accounts", principalId ?? ""],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("accounts").select("*")
+        .eq("principal_id", principalId!).order("name");
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!principalId,
+  });
+
+  const { data: balances = {} } = useQuery({
+    queryKey: ["account-balances", principalId, accounts.map((a) => a.id).join(",")],
+    enabled: accounts.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("transactions")
+        .select("account_id,counter_account_id,type,amount")
+        .in("account_id", accounts.map((a) => a.id));
+      if (error) throw error;
+      const map: Record<string, number> = {};
+      for (const a of accounts) map[a.id] = toNum(a.opening_balance);
+      for (const t of data) {
+        const amt = toNum(t.amount);
+        if (t.type === "income") map[t.account_id] = (map[t.account_id] ?? 0) + amt;
+        else if (t.type === "expense") map[t.account_id] = (map[t.account_id] ?? 0) - amt;
+        else if (t.type === "transfer") {
+          map[t.account_id] = (map[t.account_id] ?? 0) - amt;
+          if (t.counter_account_id)
+            map[t.counter_account_id] = (map[t.counter_account_id] ?? 0) + amt;
+        }
+      }
+      return map;
+    },
+  });
 
   const stats = useMemo(() => {
     let income = 0, expense = 0;
@@ -715,7 +752,6 @@ function Overview({ viewYearId }: { viewYearId: string | null }) {
     return { income, expense, net: income - expense, cats };
   }, [txs, categories]);
 
-
   return (
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-3">
@@ -732,6 +768,29 @@ function Overview({ viewYearId }: { viewYearId: string | null }) {
           <div className={`text-2xl font-semibold mt-1 ${stats.net >= 0 ? "text-emerald-600" : "text-rose-600"}`}>{fmt(stats.net)}</div>
         </CardContent></Card>
       </div>
+
+      <Card>
+        <CardHeader><CardTitle className="text-base">Saldo per konto</CardTitle></CardHeader>
+        <CardContent className="space-y-2">
+          {accounts.length === 0 && <p className="text-sm text-muted-foreground">Inga konton.</p>}
+          {accounts.map((a) => {
+            const bal = balances[a.id];
+            const shown = Number.isFinite(bal) ? bal : toNum(a.opening_balance);
+            return (
+              <div key={a.id} className="flex items-center justify-between text-sm">
+                <div className="flex items-center gap-2">
+                  <Wallet className="h-4 w-4 text-primary" />
+                  <span>{a.name}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {ACCOUNT_TYPES.find((t) => t.value === a.account_type)?.label}
+                  </span>
+                </div>
+                <span className={`font-medium ${shown >= 0 ? "text-emerald-600" : "text-rose-600"}`}>{fmt(shown)}</span>
+              </div>
+            );
+          })}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader><CardTitle className="text-base">Fördelning per kategori</CardTitle></CardHeader>
