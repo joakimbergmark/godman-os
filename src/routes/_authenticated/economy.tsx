@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
@@ -360,6 +360,14 @@ function Transactions({
       return data;
     },
   });
+  const { data: cases = [] } = useQuery({
+    queryKey: ["cases-lite", principalId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("cases").select("id,title").eq("principal_id", principalId).order("title");
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const { data: txs = [] } = useQuery({
     queryKey: ["transactions", viewYearId ?? "all", principalId],
@@ -390,6 +398,7 @@ function Transactions({
   const accountName = (id: string | null) => accounts.find((a) => a.id === id)?.name ?? "—";
   const categoryName = (id: string | null) => categories.find((c) => c.id === id)?.name ?? "";
   const docTitle = (id: string | null) => documents.find((d) => d.id === id)?.title ?? "";
+  const caseTitle = (id: string | null) => cases.find((k) => k.id === id)?.title ?? "";
 
   const openNew = () => {
     setEditing(null);
@@ -639,6 +648,11 @@ function Transactions({
                     <span className="text-xs text-muted-foreground">{new Date(t.transaction_date).toLocaleDateString("sv-SE")}</span>
                     {t.category_id && <Badge variant="secondary">{categoryName(t.category_id)}</Badge>}
                     {t.document_id && <Badge variant="outline" className="text-[10px]">📎 {docTitle(t.document_id)}</Badge>}
+                    {t.case_id && (
+                      <Link to="/cases/$caseId" params={{ caseId: t.case_id }} onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+                        <Badge variant="outline" className="text-[10px] hover:bg-accent">🗂 {caseTitle(t.case_id) || "Ärende"}</Badge>
+                      </Link>
+                    )}
                   </div>
                   <div className="text-sm mt-0.5 truncate">
                     {t.type === "transfer"
