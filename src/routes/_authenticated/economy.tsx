@@ -700,10 +700,10 @@ function Overview({ viewYearId }: { viewYearId: string | null }) {
   const { data: categories = [] } = useCategories();
 
   const { data: accounts = [] } = useQuery({
-    queryKey: ["accounts", principalId],
+    queryKey: ["accounts", principalId ?? ""],
     queryFn: async () => {
       const { data, error } = await supabase.from("accounts").select("*")
-        .eq("principal_id", principalId).order("name");
+        .eq("principal_id", principalId!).order("name");
       if (error) throw error;
       return data;
     },
