@@ -648,6 +648,11 @@ function Transactions({
                     <span className="text-xs text-muted-foreground">{new Date(t.transaction_date).toLocaleDateString("sv-SE")}</span>
                     {t.category_id && <Badge variant="secondary">{categoryName(t.category_id)}</Badge>}
                     {t.document_id && <Badge variant="outline" className="text-[10px]">📎 {docTitle(t.document_id)}</Badge>}
+                    {t.case_id && (
+                      <Link to="/cases/$caseId" params={{ caseId: t.case_id }} onClick={(e) => e.stopPropagation()}>
+                        <Badge variant="outline" className="text-[10px] hover:bg-accent">🗂 {caseTitle(t.case_id) || "Ärende"}</Badge>
+                      </Link>
+                    )}
                   </div>
                   <div className="text-sm mt-0.5 truncate">
                     {t.type === "transfer"
