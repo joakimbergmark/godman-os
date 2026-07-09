@@ -27,8 +27,16 @@ export const Route = createFileRoute("/_authenticated/economy")({
 });
 
 const today = () => new Date().toISOString().slice(0, 10);
+const toNum = (v: unknown): number => {
+  if (typeof v === "number") return Number.isFinite(v) ? v : 0;
+  if (typeof v === "string") {
+    const n = Number(v.trim().replace(/\s/g, "").replace(",", "."));
+    return Number.isFinite(n) ? n : 0;
+  }
+  return 0;
+};
 const fmt = (n: number) =>
-  new Intl.NumberFormat("sv-SE", { style: "currency", currency: "SEK", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
+  new Intl.NumberFormat("sv-SE", { style: "currency", currency: "SEK", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number.isFinite(n) ? n : 0);
 
 // ---------- schemas ----------
 const accountSchema = z.object({
@@ -163,15 +171,15 @@ function Accounts({ principalId }: { principalId: string }) {
         .in("account_id", accounts.map((a) => a.id));
       if (error) throw error;
       const map: Record<string, number> = {};
-      for (const a of accounts) map[a.id] = Number(a.opening_balance);
+      for (const a of accounts) map[a.id] = toNum(a.opening_balance);
       for (const t of data) {
-        const amt = Number(t.amount);
+        const amt = toNum(t.amount);
         if (t.type === "income") map[t.account_id] = (map[t.account_id] ?? 0) + amt;
         else if (t.type === "expense") map[t.account_id] = (map[t.account_id] ?? 0) - amt;
         else if (t.type === "transfer") {
           map[t.account_id] = (map[t.account_id] ?? 0) - amt;
-          if (t.counter_account_id && map[t.counter_account_id] !== undefined)
-            map[t.counter_account_id] = map[t.counter_account_id] + amt;
+          if (t.counter_account_id)
+            map[t.counter_account_id] = (map[t.counter_account_id] ?? 0) + amt;
         }
       }
       return map;
@@ -293,7 +301,7 @@ function Accounts({ principalId }: { principalId: string }) {
                   </div>
                   <div className="mt-3">
                     <div className="text-xs text-muted-foreground">Saldo</div>
-                    <div className="text-xl font-semibold">{fmt(balances[a.id] ?? Number(a.opening_balance))}</div>
+                    <div className="text-xl font-semibold">{fmt(Number.isFinite(balances[a.id]) ? balances[a.id] : toNum(a.opening_balance))}</div>
                   </div>
                 </div>
                 <div className="flex gap-1 shrink-0">

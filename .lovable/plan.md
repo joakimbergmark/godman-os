@@ -1,40 +1,34 @@
-# Ladda upp transaktioner via bild
+## Problem
+På `Ekonomi → Konton` beräknas saldo i frontend genom att lägga ihop `opening_balance` med samtliga transaktioners belopp (`src/routes/_authenticated/economy.tsx`, rad 157–179 och 296). Kortet visar `NaN kr` när något led i den kedjan blir `NaN`, eftersom:
 
-Ny knapp **"Ladda upp transaktioner"** till vänster om *Ny transaktion* på fliken *Transaktioner*. Öppnar dialog där huvudmannen väljer konto, laddar upp en skärmbild från internetbanken, får raderna tolkade av Lovable AI, granskar och sparar. Dubbletter blockeras.
+1. `fmt(NaN)` returnerar strängen `"NaN kr"`.
+2. Fallbacken `balances[a.id] ?? Number(a.opening_balance)` skyddar bara mot `null/undefined` — inte mot `NaN`. Så fort saldo‑map:en får ett `NaN` in fastnar det.
+3. `Number(x)` blir `NaN` om värdet råkar vara en sträng med komma‑decimal (`"705,49"`), tom sträng, eller ett annat oväntat format. Äldre rader eller AI‑importerade transaktioner kan innehålla sådana värden.
+4. I `transfer`‑grenen används `map[counter] + amt` utan `?? 0`‑skydd. Om `counter_account_id` pekar på ett konto utanför listan får vi tyst en NaN‑spridning vid framtida transfers.
 
-## Flöde
+När man öppnar `Redigera` läses saldot inte från `balances`‑beräkningen utan från `row.opening_balance` direkt (`String(row.opening_balance)` i formuläret) — därför ser man alltid ett korrekt värde där även när kortet visar NaN.
 
-1. Användaren klickar knappen → dialog öppnas.
-2. Väljer **konto** (obligatoriskt) och laddar upp en bild (PNG/JPG/WebP, max ~8 MB).
-3. Klick **Tolka bild** → bilden skickas som base64 till server function `parseBankScreenshot` som kallar Lovable AI (`google/gemini-2.5-flash`, multimodal) och får tillbaka strukturerad JSON: `{ rows: [{ date, description, amount, type: "income"|"expense" }] }`.
-4. Raderna visas i en tabell där varje rad kan redigeras (datum, typ, belopp, kommentar, kategori) eller avmarkeras. En dubblettflagga visas för rader som matchar befintlig transaktion.
-5. Klick **Spara valda** → infogar markerade, ej dubbletter, transaktioner. Toast med antal sparade + antal hoppade över.
+## Åtgärd
 
-## Dubbletthantering
+Alla ändringar sker i `src/routes/_authenticated/economy.tsx`, i `Accounts`‑komponenten.
 
-En transaktion räknas som dubblett om det redan finns en rad för samma `principal_id`, `account_id`, `transaction_date`, `type` och `amount` (belopp i öre). Kontrollen görs i två lager:
+1. Inför en liten hjälpare `toNum(v)` som gör robust parsing:
+   - accepterar `number`, `string` (både `.` och `,` som decimaltecken, trimmar mellanslag),
+   - returnerar `0` om resultatet inte är `Number.isFinite`.
+2. Använd `toNum` för både `a.opening_balance` och `t.amount` när saldot byggs upp.
+3. Härda `transfer`‑grenen: `map[counter] = (map[counter] ?? 0) + amt` (och kör toNum där också).
+4. Byt visningsraden till en NaN‑säker fallback:
+   ```ts
+   const bal = balances[a.id];
+   const shown = Number.isFinite(bal) ? bal : toNum(a.opening_balance);
+   ```
+   och rendera `fmt(shown)`.
+5. Låt saldokortet visa `0,00 kr` istället för `NaN kr` som yttersta skyddsnät (faller ut naturligt av toNum).
 
-- **Klientvarning** vid granskning: hämtar befintliga transaktioner för kontot ± 7 dagar och flaggar matchning i UI så användaren ser vad som hoppas över.
-- **Server-side guard** i server function före insert: filtrerar bort rader som redan matchar i databasen (skydd mot race/omtolkad bild).
+## Verifiering
 
-Ingen unik index-ändring görs — matchningen bygger på identiska värden och håller strategin flexibel om t ex kommentar skiljer.
+- Typecheck.
+- Öppna `Ekonomi → Konton` i preview och bekräfta att kortet visar korrekt saldo (t ex `405,43 kr` för Allkonto: 705,49 + 1 900,00 − 2 200,06).
+- Skapa en ny transaktion via `Ny transaktion` och via `Ladda upp transaktioner` och verifiera att saldot uppdateras utan NaN.
 
-## Filer
-
-- **Ny**: `src/lib/parse-bank-screenshot.functions.ts` — `createServerFn` med `requireSupabaseAuth`. Tar `{ imageBase64, mimeType }`, kallar Lovable AI Gateway (via helper från `ai-sdk-lovable-gateway`), returnerar `{ rows }`. Strikt Zod-schema; om AI returnerar tomt/ogiltigt → tomt resultat + felmeddelande.
-- **Ny**: `src/lib/ai-gateway.server.ts` (om saknas) — provider-helper enligt kunskapsdokument.
-- **Ny**: `src/components/economy/ImportTransactionsDialog.tsx` — dialogen (uppladdning, tolkning, granskningstabell, spara).
-- **Redigerad**: `src/routes/_authenticated/economy.tsx` — importera dialogen och lägg knappen till vänster om *Ny transaktion*.
-
-## AI-prompt (sammanfattning)
-
-System: "Du tolkar svenska bankkontoutdrag från skärmbilder. Extrahera varje synlig transaktionsrad. Returnera JSON enligt schemat. Datum i ISO (YYYY-MM-DD). Belopp positivt tal. `type` = `expense` om uttag/betalning, `income` om insättning. Ignorera saldorader och rubriker."
-
-Structured output via `generateText({ output: Output.object({ schema }) })` med `{ structuredOutputs: true }` på providern.
-
-## Avgränsningar
-
-- Endast bilder i denna iteration (ingen PDF/CSV).
-- Kategori sätts inte automatiskt — användaren kan välja per rad i granskningen.
-- Dokumentkoppling (bilaga) ingår inte — kan läggas till senare.
-- Ingen ny databasändring krävs.
+Ingen ändring av databasschema, RLS eller andra vyer behövs.
