@@ -12,6 +12,9 @@ import {
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 
+const fmt = (n: number) =>
+  new Intl.NumberFormat("sv-SE", { style: "currency", currency: "SEK", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
+
 export const Route = createFileRoute("/_authenticated/year-overview")({
   component: YearOverviewPage,
 });
@@ -24,17 +27,29 @@ function YearOverviewPage() {
     queryKey: ["year-overview", selectedId],
     enabled: !!selectedId,
     queryFn: async () => {
-      const [activities, documents, tasks] = await Promise.all([
+      const [activities, documents, tasks, transactions] = await Promise.all([
         supabase.from("activities").select("id", { count: "exact", head: true }).eq("accounting_year_id", selectedId!),
         supabase.from("documents").select("id", { count: "exact", head: true }).eq("accounting_year_id", selectedId!),
         supabase.from("tasks").select("id,status").eq("accounting_year_id", selectedId!),
+        supabase.from("transactions").select("type,amount").eq("accounting_year_id", selectedId!),
       ]);
       const t = tasks.data ?? [];
+      const txs = transactions.data ?? [];
+      let income = 0, expense = 0;
+      for (const tx of txs) {
+        const amt = Number(tx.amount);
+        if (tx.type === "income") income += amt;
+        else if (tx.type === "expense") expense += amt;
+      }
       return {
         activitiesCount: activities.count ?? 0,
         documentsCount: documents.count ?? 0,
         openTasks: t.filter((x) => x.status !== "done").length,
         doneTasks: t.filter((x) => x.status === "done").length,
+        income,
+        expense,
+        net: income - expense,
+        txCount: txs.length,
       };
     },
   });
@@ -142,20 +157,23 @@ function YearOverviewPage() {
           <CardTitle className="text-base flex items-center gap-2">
             <Wallet className="h-4 w-4" /> Ekonomi
           </CardTitle>
-          <Badge variant="outline" className="text-[10px]">Kommer snart</Badge>
+          <Link to="/economy" className="text-xs text-primary hover:underline">Visa ekonomi →</Link>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-3 text-sm">
           <div>
             <div className="text-xs text-muted-foreground">Inkomster</div>
-            <div className="text-xl font-semibold text-muted-foreground">—</div>
+            <div className="text-xl font-semibold text-emerald-600 mt-1">{fmt(data?.income ?? 0)}</div>
           </div>
           <div>
             <div className="text-xs text-muted-foreground">Utgifter</div>
-            <div className="text-xl font-semibold text-muted-foreground">—</div>
+            <div className="text-xl font-semibold text-rose-600 mt-1">{fmt(data?.expense ?? 0)}</div>
           </div>
           <div>
             <div className="text-xs text-muted-foreground">Saldo</div>
-            <div className="text-xl font-semibold text-muted-foreground">—</div>
+            <div className={`text-xl font-semibold mt-1 ${(data?.net ?? 0) >= 0 ? "text-emerald-600" : "text-rose-600"}`}>{fmt(data?.net ?? 0)}</div>
+          </div>
+          <div className="sm:col-span-3 text-xs text-muted-foreground">
+            Baserat på {data?.txCount ?? 0} transaktion{(data?.txCount ?? 0) === 1 ? "" : "er"} för året.
           </div>
         </CardContent>
       </Card>
