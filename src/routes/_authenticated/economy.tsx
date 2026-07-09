@@ -171,15 +171,15 @@ function Accounts({ principalId }: { principalId: string }) {
         .in("account_id", accounts.map((a) => a.id));
       if (error) throw error;
       const map: Record<string, number> = {};
-      for (const a of accounts) map[a.id] = Number(a.opening_balance);
+      for (const a of accounts) map[a.id] = toNum(a.opening_balance);
       for (const t of data) {
-        const amt = Number(t.amount);
+        const amt = toNum(t.amount);
         if (t.type === "income") map[t.account_id] = (map[t.account_id] ?? 0) + amt;
         else if (t.type === "expense") map[t.account_id] = (map[t.account_id] ?? 0) - amt;
         else if (t.type === "transfer") {
           map[t.account_id] = (map[t.account_id] ?? 0) - amt;
-          if (t.counter_account_id && map[t.counter_account_id] !== undefined)
-            map[t.counter_account_id] = map[t.counter_account_id] + amt;
+          if (t.counter_account_id)
+            map[t.counter_account_id] = (map[t.counter_account_id] ?? 0) + amt;
         }
       }
       return map;
