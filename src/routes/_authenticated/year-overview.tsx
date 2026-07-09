@@ -157,20 +157,23 @@ function YearOverviewPage() {
           <CardTitle className="text-base flex items-center gap-2">
             <Wallet className="h-4 w-4" /> Ekonomi
           </CardTitle>
-          <Badge variant="outline" className="text-[10px]">Kommer snart</Badge>
+          <Link to="/economy" className="text-xs text-primary hover:underline">Visa ekonomi →</Link>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-3 text-sm">
           <div>
             <div className="text-xs text-muted-foreground">Inkomster</div>
-            <div className="text-xl font-semibold text-muted-foreground">—</div>
+            <div className="text-xl font-semibold text-emerald-600 mt-1">{fmt(data?.income ?? 0)}</div>
           </div>
           <div>
             <div className="text-xs text-muted-foreground">Utgifter</div>
-            <div className="text-xl font-semibold text-muted-foreground">—</div>
+            <div className="text-xl font-semibold text-rose-600 mt-1">{fmt(data?.expense ?? 0)}</div>
           </div>
           <div>
             <div className="text-xs text-muted-foreground">Saldo</div>
-            <div className="text-xl font-semibold text-muted-foreground">—</div>
+            <div className={`text-xl font-semibold mt-1 ${(data?.net ?? 0) >= 0 ? "text-emerald-600" : "text-rose-600"}`}>{fmt(data?.net ?? 0)}</div>
+          </div>
+          <div className="sm:col-span-3 text-xs text-muted-foreground">
+            Baserat på {data?.txCount ?? 0} transaktion{(data?.txCount ?? 0) === 1 ? "" : "er"} för året.
           </div>
         </CardContent>
       </Card>
