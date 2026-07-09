@@ -27,17 +27,29 @@ function YearOverviewPage() {
     queryKey: ["year-overview", selectedId],
     enabled: !!selectedId,
     queryFn: async () => {
-      const [activities, documents, tasks] = await Promise.all([
+      const [activities, documents, tasks, transactions] = await Promise.all([
         supabase.from("activities").select("id", { count: "exact", head: true }).eq("accounting_year_id", selectedId!),
         supabase.from("documents").select("id", { count: "exact", head: true }).eq("accounting_year_id", selectedId!),
         supabase.from("tasks").select("id,status").eq("accounting_year_id", selectedId!),
+        supabase.from("transactions").select("type,amount").eq("accounting_year_id", selectedId!),
       ]);
       const t = tasks.data ?? [];
+      const txs = transactions.data ?? [];
+      let income = 0, expense = 0;
+      for (const tx of txs) {
+        const amt = Number(tx.amount);
+        if (tx.type === "income") income += amt;
+        else if (tx.type === "expense") expense += amt;
+      }
       return {
         activitiesCount: activities.count ?? 0,
         documentsCount: documents.count ?? 0,
         openTasks: t.filter((x) => x.status !== "done").length,
         doneTasks: t.filter((x) => x.status === "done").length,
+        income,
+        expense,
+        net: income - expense,
+        txCount: txs.length,
       };
     },
   });
