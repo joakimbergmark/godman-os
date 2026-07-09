@@ -27,8 +27,16 @@ export const Route = createFileRoute("/_authenticated/economy")({
 });
 
 const today = () => new Date().toISOString().slice(0, 10);
+const toNum = (v: unknown): number => {
+  if (typeof v === "number") return Number.isFinite(v) ? v : 0;
+  if (typeof v === "string") {
+    const n = Number(v.trim().replace(/\s/g, "").replace(",", "."));
+    return Number.isFinite(n) ? n : 0;
+  }
+  return 0;
+};
 const fmt = (n: number) =>
-  new Intl.NumberFormat("sv-SE", { style: "currency", currency: "SEK", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
+  new Intl.NumberFormat("sv-SE", { style: "currency", currency: "SEK", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number.isFinite(n) ? n : 0);
 
 // ---------- schemas ----------
 const accountSchema = z.object({
