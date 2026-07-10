@@ -16,7 +16,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Download, Pencil, Plus, Search, Trash2, ArrowUpDown, FileText } from "lucide-react";
+import { Download, Pencil, Plus, Search, Trash2, ArrowUpDown, FileText, Eye } from "lucide-react";
 import { useAccountingYear } from "@/lib/accounting-year";
 import { CaseSelector } from "@/components/CaseSelector";
 
