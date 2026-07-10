@@ -175,6 +175,14 @@ function DocumentsPage() {
     window.open(data.signedUrl, "_blank");
   };
 
+  const preview = async (row: typeof data[number]) => {
+    const { data, error } = await supabase.storage
+      .from("documents")
+      .createSignedUrl(row.storage_path, 60, { download: false });
+    if (error || !data) return toast.error(error?.message ?? "Kunde inte skapa länk");
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
