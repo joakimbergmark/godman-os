@@ -293,7 +293,8 @@ function DocumentsPage() {
                 </div>
               </div>
               <div className="flex gap-1 shrink-0">
-                <Button size="icon" variant="ghost" onClick={() => download(d)}><Download className="h-4 w-4" /></Button>
+                <Button size="icon" variant="ghost" onClick={() => preview(d)} title="Förhandsvisa"><Eye className="h-4 w-4" /></Button>
+                <Button size="icon" variant="ghost" onClick={() => download(d)} title="Ladda ner"><Download className="h-4 w-4" /></Button>
                 <Button size="icon" variant="ghost" onClick={() => openEdit(d)}><Pencil className="h-4 w-4" /></Button>
                 <Button size="icon" variant="ghost" onClick={() => del(d)}><Trash2 className="h-4 w-4" /></Button>
               </div>
