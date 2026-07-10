@@ -16,7 +16,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Download, Pencil, Plus, Search, Trash2, ArrowUpDown, FileText } from "lucide-react";
+import { Download, Pencil, Plus, Search, Trash2, ArrowUpDown, FileText, Eye } from "lucide-react";
 import { useAccountingYear } from "@/lib/accounting-year";
 import { CaseSelector } from "@/components/CaseSelector";
 
@@ -175,6 +175,14 @@ function DocumentsPage() {
     window.open(data.signedUrl, "_blank");
   };
 
+  const preview = async (row: typeof data[number]) => {
+    const { data, error } = await supabase.storage
+      .from("documents")
+      .createSignedUrl(row.storage_path, 60, { download: false });
+    if (error || !data) return toast.error(error?.message ?? "Kunde inte skapa länk");
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -285,7 +293,8 @@ function DocumentsPage() {
                 </div>
               </div>
               <div className="flex gap-1 shrink-0">
-                <Button size="icon" variant="ghost" onClick={() => download(d)}><Download className="h-4 w-4" /></Button>
+                <Button size="icon" variant="ghost" onClick={() => preview(d)} title="Förhandsvisa"><Eye className="h-4 w-4" /></Button>
+                <Button size="icon" variant="ghost" onClick={() => download(d)} title="Ladda ner"><Download className="h-4 w-4" /></Button>
                 <Button size="icon" variant="ghost" onClick={() => openEdit(d)}><Pencil className="h-4 w-4" /></Button>
                 <Button size="icon" variant="ghost" onClick={() => del(d)}><Trash2 className="h-4 w-4" /></Button>
               </div>
