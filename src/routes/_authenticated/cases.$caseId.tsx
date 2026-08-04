@@ -309,7 +309,15 @@ function CaseHeader({ c, authorityContact, onUpdated }: { c: any; authorityConta
             </div>
           </div>
           <div className="flex gap-2 shrink-0">
-            <Dialog open={open} onOpenChange={setOpen}>
+            <Dialog open={open} onOpenChange={(v) => {
+              setOpen(v);
+              if (v) setForm({
+                title: c.title, description: c.description ?? "", category: c.category ?? "",
+                life_area: c.life_area, status: c.status, priority: c.priority,
+                start_date: c.start_date ?? "", due_date: c.due_date ?? "", completed_date: c.completed_date ?? "",
+                authority_contact_id: c.authority_contact_id ?? "", notes: c.notes ?? "",
+              });
+            }}>
               <DialogTrigger asChild><Button variant="outline" size="sm"><Pencil className="h-4 w-4 mr-1" />Redigera</Button></DialogTrigger>
               <DialogContent className="max-w-lg">
                 <DialogHeader><DialogTitle>Redigera ärende</DialogTitle></DialogHeader>
