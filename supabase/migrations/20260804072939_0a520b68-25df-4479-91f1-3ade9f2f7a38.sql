@@ -1,0 +1,1 @@
+UPDATE public.cases SET status = 'completed', updated_at = now() WHERE completed_date IS NOT NULL AND status NOT IN ('completed','cancelled');
