@@ -262,16 +262,21 @@ function CaseHeader({ c, authorityContact, onUpdated }: { c: any; authorityConta
   const save = async () => {
     const parsed = headerSchema.safeParse(form);
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
+    // Håll status och avslutsdatum i synk
+    let status = parsed.data.status;
+    let completed_date = parsed.data.completed_date || null;
+    if (completed_date && status !== "completed" && status !== "cancelled") status = "completed";
+    if (status === "completed" && !completed_date) completed_date = new Date().toISOString().slice(0, 10);
     const upd = {
       title: parsed.data.title,
       description: parsed.data.description || null,
       category: parsed.data.category || null,
       life_area: parsed.data.life_area,
-      status: parsed.data.status,
+      status,
       priority: parsed.data.priority,
       start_date: parsed.data.start_date || null,
       due_date: parsed.data.due_date || null,
-      completed_date: parsed.data.completed_date || null,
+      completed_date,
       authority_contact_id: parsed.data.authority_contact_id || null,
       notes: parsed.data.notes || null,
     };
