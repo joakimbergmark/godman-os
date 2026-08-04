@@ -150,10 +150,10 @@ function CaseDetailPage() {
         </TabsContent>
 
         <TabsContent value="activities" className="mt-4">
-          <RelatedList items={activities.map((a) => ({ id: a.id, title: a.title, sub: a.category, when: a.activity_date }))} emptyText="Inga aktiviteter kopplade." linkTo="/activities" />
+          <RelatedList items={activities.map((a) => ({ id: a.id, title: a.title, sub: a.category, when: a.activity_date }))} emptyText="Inga aktiviteter kopplade." linkTo="/activities" openable />
         </TabsContent>
         <TabsContent value="tasks" className="mt-4">
-          <RelatedList items={tasks.map((t) => ({ id: t.id, title: t.title, sub: `${t.status} · ${t.priority}`, when: t.deadline }))} emptyText="Inga uppgifter kopplade." linkTo="/tasks" />
+          <RelatedList items={tasks.map((t) => ({ id: t.id, title: t.title, sub: `${t.status} · ${t.priority}`, when: t.deadline }))} emptyText="Inga uppgifter kopplade." linkTo="/tasks" openable />
         </TabsContent>
         <TabsContent value="documents" className="mt-4">
           <RelatedList items={documents.map((d) => ({ id: d.id, title: d.title, sub: d.category, when: d.document_date ?? d.created_at }))} emptyText="Inga dokument kopplade." linkTo="/documents" />
