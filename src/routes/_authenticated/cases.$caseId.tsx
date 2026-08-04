@@ -150,10 +150,10 @@ function CaseDetailPage() {
         </TabsContent>
 
         <TabsContent value="activities" className="mt-4">
-          <RelatedList items={activities.map((a) => ({ id: a.id, title: a.title, sub: a.category, when: a.activity_date }))} emptyText="Inga aktiviteter kopplade." linkTo="/activities" />
+          <RelatedList items={activities.map((a) => ({ id: a.id, title: a.title, sub: a.category, when: a.activity_date }))} emptyText="Inga aktiviteter kopplade." linkTo="/activities" openable />
         </TabsContent>
         <TabsContent value="tasks" className="mt-4">
-          <RelatedList items={tasks.map((t) => ({ id: t.id, title: t.title, sub: `${t.status} · ${t.priority}`, when: t.deadline }))} emptyText="Inga uppgifter kopplade." linkTo="/tasks" />
+          <RelatedList items={tasks.map((t) => ({ id: t.id, title: t.title, sub: `${t.status} · ${t.priority}`, when: t.deadline }))} emptyText="Inga uppgifter kopplade." linkTo="/tasks" openable />
         </TabsContent>
         <TabsContent value="documents" className="mt-4">
           <RelatedList items={documents.map((d) => ({ id: d.id, title: d.title, sub: d.category, when: d.document_date ?? d.created_at }))} emptyText="Inga dokument kopplade." linkTo="/documents" />
@@ -202,7 +202,7 @@ function Stat({ label, value, to }: { label: string; value: number; to: string }
   );
 }
 
-function RelatedList({ items, emptyText, linkTo }: { items: { id: string; title: string; sub?: string | null; when?: string | null }[]; emptyText: string; linkTo: string }) {
+function RelatedList({ items, emptyText, linkTo, openable }: { items: { id: string; title: string; sub?: string | null; when?: string | null }[]; emptyText: string; linkTo: string; openable?: boolean }) {
   if (items.length === 0) {
     return (
       <Card><CardContent className="py-8 text-center text-sm text-muted-foreground space-y-2">
@@ -213,17 +213,26 @@ function RelatedList({ items, emptyText, linkTo }: { items: { id: string; title:
   }
   return (
     <div className="grid gap-2">
-      {items.map((i) => (
-        <Card key={i.id}>
+      {items.map((i) => {
+        const body = (
           <CardContent className="p-3 flex items-center justify-between gap-2">
             <div className="min-w-0">
               <div className="font-medium truncate">{i.title}</div>
               {i.sub && <div className="text-xs text-muted-foreground truncate">{i.sub}</div>}
             </div>
-            <div className="text-xs text-muted-foreground shrink-0">{fmt(i.when)}</div>
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="text-xs text-muted-foreground">{fmt(i.when)}</span>
+              {openable && <span className="text-xs text-primary">Öppna →</span>}
+            </div>
           </CardContent>
-        </Card>
-      ))}
+        );
+        if (!openable) return <Card key={i.id}>{body}</Card>;
+        return (
+          <Link key={i.id} to={linkTo} search={{ highlight: i.id }} className="block">
+            <Card className="transition-colors hover:border-primary/50 hover:bg-accent/40">{body}</Card>
+          </Link>
+        );
+      })}
     </div>
   );
 }
