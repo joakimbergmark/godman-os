@@ -394,6 +394,7 @@ function Transactions({
     const rows = txs.filter((t) => {
       if (filterType !== "all" && t.type !== filterType) return false;
       if (filterCategory !== "all" && t.category_id !== filterCategory) return false;
+      if (viewAccountId && t.account_id !== viewAccountId && t.counter_account_id !== viewAccountId) return false;
       return true;
     });
     const sorted = [...rows].sort((a, b) => {
@@ -403,7 +404,8 @@ function Transactions({
       return sortKey === "amount_desc" ? bv - av : av - bv;
     });
     return sorted;
-  }, [txs, filterType, filterCategory, sortKey]);
+  }, [txs, filterType, filterCategory, sortKey, viewAccountId]);
+
 
   const accountName = (id: string | null) => accounts.find((a) => a.id === id)?.name ?? "—";
   const categoryName = (id: string | null) => categories.find((c) => c.id === id)?.name ?? "";
