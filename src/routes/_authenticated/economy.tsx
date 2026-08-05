@@ -332,12 +332,14 @@ function useCategories() {
 
 // ---------- Transactions ----------
 function Transactions({
-  viewYearId, defaultYearId, principalId,
+  viewYearId, viewAccountId, defaultYearId, principalId,
 }: {
   viewYearId: string | null;
+  viewAccountId: string | null;
   defaultYearId: string | null;
   principalId: string;
 }) {
+
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
