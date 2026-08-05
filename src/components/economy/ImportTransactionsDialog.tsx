@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Upload, Loader2, AlertTriangle } from "lucide-react";
 import { parseBankScreenshot } from "@/lib/parse-bank-screenshot.functions";
+import { isDuplicate, shiftDate, DAY_TOLERANCE, type ExistingTx } from "@/lib/import-duplicates";
 
 type Account = { id: string; name: string };
 
@@ -23,11 +24,69 @@ type Row = {
   key: string;
   selected: boolean;
   date: string;
+  bookingDate: string | null;
   description: string;
   amount: string; // string for editable input
   type: "income" | "expense";
   duplicate: boolean;
 };
+
+type Mode = "image" | "excel";
+
+function toIsoDate(v: unknown): string {
+  if (v instanceof Date) return new Date(v.getTime() - v.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  const s = String(v ?? "").trim();
+  const m = s.match(/(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return m[0];
+  const m2 = s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (m2) return `${m2[3]}-${m2[2]}-${m2[1]}`;
+  return "";
+}
+
+function toAmount(v: unknown): number {
+  if (typeof v === "number") return v;
+  const n = Number(String(v ?? "").replace(/\s|\u00a0/g, "").replace(/kr/i, "").replace(",", "."));
+  return Number.isFinite(n) ? n : NaN;
+}
+
+async function parseExcelFile(file: File): Promise<Omit<Row, "key" | "selected" | "duplicate">[]> {
+  const XLSX = await import("xlsx");
+  const buf = await file.arrayBuffer();
+  const wb = XLSX.read(buf, { cellDates: true });
+  const sheetName = wb.SheetNames[0];
+  if (!sheetName) return [];
+  const sheet = wb.Sheets[sheetName];
+  const grid = XLSX.utils.sheet_to_json<unknown[]>(sheet!, { header: 1, blankrows: false, raw: true });
+
+  const headerIdx = grid.findIndex((r) =>
+    (r ?? []).some((c) => /transaktionsdatum/i.test(String(c ?? ""))),
+  );
+  if (headerIdx === -1) throw new Error("Hittade ingen rubrikrad med \"Transaktionsdatum\" i filen.");
+
+  const header = (grid[headerIdx] ?? []).map((c) => String(c ?? "").trim().toLowerCase());
+  const col = (re: RegExp) => header.findIndex((h) => re.test(h));
+  const iBooking = col(/reskontra/);
+  const iDate = col(/transaktionsdatum/);
+  const iText = col(/^text|beskrivning/);
+  const iAmount = col(/belopp/);
+  if (iDate === -1 || iAmount === -1) throw new Error("Kolumnerna Transaktionsdatum och Belopp krävs.");
+
+  const out: Omit<Row, "key" | "selected" | "duplicate">[] = [];
+  for (const r of grid.slice(headerIdx + 1)) {
+    if (!r) continue;
+    const date = toIsoDate(r[iDate]);
+    const amt = toAmount(r[iAmount]);
+    if (!date || !Number.isFinite(amt) || amt === 0) continue;
+    out.push({
+      date,
+      bookingDate: iBooking >= 0 ? (toIsoDate(r[iBooking]) || null) : null,
+      description: iText >= 0 ? String(r[iText] ?? "").trim() : "",
+      amount: Math.abs(amt).toFixed(2).replace(".", ","),
+      type: amt < 0 ? "expense" : "income",
+    });
+  }
+  return out;
+}
 
 export function ImportTransactionsDialog({
   open, onOpenChange, accounts, principalId, accountingYearId,
@@ -40,6 +99,7 @@ export function ImportTransactionsDialog({
 }) {
   const qc = useQueryClient();
   const parseFn = useServerFn(parseBankScreenshot);
+  const [mode, setMode] = useState<Mode>("excel");
   const [accountId, setAccountId] = useState<string>(accounts[0]?.id ?? "");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -54,68 +114,97 @@ export function ImportTransactionsDialog({
   const handleFile = (f: File | null) => {
     if (!f) { reset(); return; }
     if (f.size > 8 * 1024 * 1024) { toast.error("Max 8 MB"); return; }
-    if (!/^image\/(png|jpe?g|webp)$/.test(f.type)) { toast.error("Endast PNG, JPG eller WebP"); return; }
+    if (mode === "image" && !/^image\/(png|jpe?g|webp)$/.test(f.type)) {
+      toast.error("Endast PNG, JPG eller WebP"); return;
+    }
+    if (mode === "excel" && !/\.(xlsx|xls)$/i.test(f.name)) {
+      toast.error("Endast .xlsx eller .xls"); return;
+    }
     setFile(f);
-    const reader = new FileReader();
-    reader.onload = () => setPreview(String(reader.result));
-    reader.readAsDataURL(f);
     setRows([]);
+    if (mode === "image") {
+      const reader = new FileReader();
+      reader.onload = () => setPreview(String(reader.result));
+      reader.readAsDataURL(f);
+    } else {
+      setPreview(null);
+    }
+  };
+
+  const fetchExisting = async (dates: string[]): Promise<ExistingTx[]> => {
+    const sorted = [...dates].filter(Boolean).sort();
+    if (sorted.length === 0) return [];
+    const { data } = await supabase
+      .from("transactions")
+      .select("transaction_date,type,amount,comment")
+      .eq("principal_id", principalId)
+      .eq("account_id", accountId)
+      .gte("transaction_date", shiftDate(sorted[0]!, -DAY_TOLERANCE))
+      .lte("transaction_date", shiftDate(sorted[sorted.length - 1]!, DAY_TOLERANCE));
+    return (data ?? []) as ExistingTx[];
+  };
+
+  const markDuplicates = (
+    parsed: Omit<Row, "key" | "selected" | "duplicate">[],
+    existing: ExistingTx[],
+  ): Row[] => {
+    const seen: ExistingTx[] = [];
+    return parsed.map((r, i) => {
+      const cand = {
+        date: r.date,
+        bookingDate: r.bookingDate,
+        description: r.description,
+        amount: Number(r.amount.replace(",", ".")),
+        type: r.type,
+      };
+      const duplicate = isDuplicate(cand, existing) || isDuplicate(cand, seen);
+      seen.push({
+        transaction_date: r.date,
+        type: r.type,
+        amount: cand.amount,
+        comment: r.description,
+      });
+      return { ...r, key: `${i}-${r.date}-${r.amount}-${r.type}`, selected: !duplicate, duplicate };
+    });
   };
 
   const parse = async () => {
-    if (!file || !accountId) { toast.error("Välj konto och bild"); return; }
+    if (!file || !accountId) { toast.error("Välj konto och fil"); return; }
     setParsing(true);
     try {
-      const dataUrl = await new Promise<string>((resolve, reject) => {
-        const r = new FileReader();
-        r.onload = () => resolve(String(r.result));
-        r.onerror = () => reject(r.error);
-        r.readAsDataURL(file);
-      });
-      const base64 = dataUrl.split(",")[1] ?? "";
-      const result = await parseFn({ data: { imageBase64: base64, mimeType: file.type } });
-      if (!result.rows.length) {
-        toast.warning("Inga transaktioner kunde tolkas från bilden.");
+      let parsed: Omit<Row, "key" | "selected" | "duplicate">[];
+
+      if (mode === "excel") {
+        parsed = await parseExcelFile(file);
+      } else {
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+          const r = new FileReader();
+          r.onload = () => resolve(String(r.result));
+          r.onerror = () => reject(r.error);
+          r.readAsDataURL(file);
+        });
+        const base64 = dataUrl.split(",")[1] ?? "";
+        const result = await parseFn({ data: { imageBase64: base64, mimeType: file.type } });
+        parsed = result.rows.map((r) => ({
+          date: r.date,
+          bookingDate: null,
+          description: r.description,
+          amount: r.amount.toFixed(2).replace(".", ","),
+          type: r.type,
+        }));
+      }
+
+      if (!parsed.length) {
+        toast.warning("Inga transaktioner kunde tolkas från filen.");
         setRows([]);
         return;
       }
 
-      // Duplicate check: fetch existing tx for this account in a broad date range
-      const dates = result.rows.map((r) => r.date).sort();
-      const minDate = dates[0];
-      const maxDate = dates[dates.length - 1];
-      const { data: existing = [] } = await supabase
-        .from("transactions")
-        .select("transaction_date,type,amount")
-        .eq("principal_id", principalId)
-        .eq("account_id", accountId)
-        .gte("transaction_date", minDate)
-        .lte("transaction_date", maxDate);
-
-      const existSet = new Set(
-        (existing ?? []).map((e) => `${e.transaction_date}|${e.type}|${Math.round(Number(e.amount) * 100)}`),
-      );
-
-      const seenInBatch = new Set<string>();
-      const newRows: Row[] = result.rows.map((r, i) => {
-        const key = `${r.date}|${r.type}|${Math.round(r.amount * 100)}`;
-        const dupInDb = existSet.has(key);
-        const dupInBatch = seenInBatch.has(key);
-        seenInBatch.add(key);
-        const duplicate = dupInDb || dupInBatch;
-        return {
-          key: `${i}-${key}`,
-          selected: !duplicate,
-          date: r.date,
-          description: r.description,
-          amount: r.amount.toFixed(2).replace(".", ","),
-          type: r.type,
-          duplicate,
-        };
-      });
+      const existing = await fetchExisting(parsed.flatMap((r) => [r.date, r.bookingDate ?? ""]));
+      const newRows = markDuplicates(parsed, existing);
       setRows(newRows);
       const dupCount = newRows.filter((r) => r.duplicate).length;
-      toast.success(`${newRows.length} rader tolkade` + (dupCount ? ` (${dupCount} möjliga dubbletter)` : ""));
+      toast.success(`${newRows.length} rader tolkade` + (dupCount ? ` (${dupCount} redan importerade)` : ""));
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "Tolkning misslyckades";
       toast.error(msg);
@@ -138,18 +227,7 @@ export function ImportTransactionsDialog({
       const owner_id = s.session?.user?.id;
       if (!owner_id) { toast.error("Sessionen har gått ut"); return; }
 
-      // Server-side duplicate re-check (broad window covering rows)
-      const dates = selectedRows.map((r) => r.date).sort();
-      const { data: existing = [] } = await supabase
-        .from("transactions")
-        .select("transaction_date,type,amount")
-        .eq("principal_id", principalId)
-        .eq("account_id", accountId)
-        .gte("transaction_date", dates[0])
-        .lte("transaction_date", dates[dates.length - 1]);
-      const existSet = new Set(
-        (existing ?? []).map((e) => `${e.transaction_date}|${e.type}|${Math.round(Number(e.amount) * 100)}`),
-      );
+      const existing = await fetchExisting(selectedRows.flatMap((r) => [r.date, r.bookingDate ?? ""]));
 
       type InsertRow = {
         owner_id: string;
@@ -162,14 +240,17 @@ export function ImportTransactionsDialog({
         comment: string | null;
       };
       const toInsert: InsertRow[] = [];
+      const accepted: ExistingTx[] = [];
       let skipped = 0;
-      const batchSet = new Set<string>();
       for (const r of selectedRows) {
         const amt = Number(String(r.amount).replace(",", "."));
         if (!Number.isFinite(amt) || amt <= 0) { skipped++; continue; }
-        const key = `${r.date}|${r.type}|${Math.round(amt * 100)}`;
-        if (existSet.has(key) || batchSet.has(key)) { skipped++; continue; }
-        batchSet.add(key);
+        const cand = {
+          date: r.date, bookingDate: r.bookingDate, description: r.description,
+          amount: amt, type: r.type,
+        };
+        if (isDuplicate(cand, existing) || isDuplicate(cand, accepted)) { skipped++; continue; }
+        accepted.push({ transaction_date: r.date, type: r.type, amount: amt, comment: r.description });
         toInsert.push({
           owner_id,
           principal_id: principalId,
@@ -208,7 +289,17 @@ export function ImportTransactionsDialog({
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div className="space-y-1.5">
+              <Label>Källa *</Label>
+              <Select value={mode} onValueChange={(v) => { setMode(v as Mode); reset(); }}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="excel">Excel-fil (.xlsx)</SelectItem>
+                  <SelectItem value="image">Skärmbild (AI)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <div className="space-y-1.5">
               <Label>Konto *</Label>
               <Select value={accountId} onValueChange={setAccountId}>
@@ -219,9 +310,14 @@ export function ImportTransactionsDialog({
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label>Skärmbild (PNG/JPG/WebP, max 8 MB)</Label>
-              <Input type="file" accept="image/png,image/jpeg,image/webp"
-                onChange={(e) => handleFile(e.target.files?.[0] ?? null)} />
+              <Label>{mode === "excel" ? "Excel-fil (max 8 MB)" : "Skärmbild (PNG/JPG/WebP)"}</Label>
+              <Input
+                type="file"
+                accept={mode === "excel"
+                  ? ".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                  : "image/png,image/jpeg,image/webp"}
+                onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
+              />
             </div>
           </div>
 
@@ -233,7 +329,9 @@ export function ImportTransactionsDialog({
 
           <div className="flex justify-end">
             <Button onClick={parse} disabled={!file || !accountId || parsing}>
-              {parsing ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Tolkar…</> : <>Tolka bild</>}
+              {parsing
+                ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Tolkar…</>
+                : <>{mode === "excel" ? "Läs fil" : "Tolka bild"}</>}
             </Button>
           </div>
 
@@ -243,7 +341,7 @@ export function ImportTransactionsDialog({
                 {rows.length} tolkade rader · {selectedRows.length} valda
                 {rows.some((r) => r.duplicate) && (
                   <span className="ml-2 inline-flex items-center gap-1 text-amber-600">
-                    <AlertTriangle className="h-3 w-3" /> möjliga dubbletter är avmarkerade
+                    <AlertTriangle className="h-3 w-3" /> redan importerade rader är avmarkerade
                   </span>
                 )}
               </div>
