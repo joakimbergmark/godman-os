@@ -738,8 +738,12 @@ function Overview({ viewYearId, viewAccountId }: { viewYearId: string | null; vi
   const stats = useMemo(() => {
     let income = 0, expense = 0;
     const byCat: Record<string, { name: string; kind: string; total: number }> = {};
-    for (const t of txs) {
+    const rows = viewAccountId
+      ? txs.filter((t) => t.account_id === viewAccountId || t.counter_account_id === viewAccountId)
+      : txs;
+    for (const t of rows) {
       const amt = Number(t.amount);
+
       if (t.type === "income") income += amt;
       else if (t.type === "expense") expense += amt;
       if (t.type !== "transfer" && t.category_id) {
