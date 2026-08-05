@@ -780,8 +780,9 @@ function Overview({ viewYearId, viewAccountId }: { viewYearId: string | null; vi
       <Card>
         <CardHeader><CardTitle className="text-base">Saldo per konto</CardTitle></CardHeader>
         <CardContent className="space-y-2">
-          {accounts.length === 0 && <p className="text-sm text-muted-foreground">Inga konton.</p>}
-          {accounts.map((a) => {
+          {shownAccounts.length === 0 && <p className="text-sm text-muted-foreground">Inga konton.</p>}
+          {shownAccounts.map((a) => {
+
             const bal = balances[a.id];
             const shown = Number.isFinite(bal) ? bal : toNum(a.opening_balance);
             return (
