@@ -1,34 +1,37 @@
-## Problem
-På `Ekonomi → Konton` beräknas saldo i frontend genom att lägga ihop `opening_balance` med samtliga transaktioners belopp (`src/routes/_authenticated/economy.tsx`, rad 157–179 och 296). Kortet visar `NaN kr` när något led i den kedjan blir `NaN`, eftersom:
+# Importera transaktioner från Excel
 
-1. `fmt(NaN)` returnerar strängen `"NaN kr"`.
-2. Fallbacken `balances[a.id] ?? Number(a.opening_balance)` skyddar bara mot `null/undefined` — inte mot `NaN`. Så fort saldo‑map:en får ett `NaN` in fastnar det.
-3. `Number(x)` blir `NaN` om värdet råkar vara en sträng med komma‑decimal (`"705,49"`), tom sträng, eller ett annat oväntat format. Äldre rader eller AI‑importerade transaktioner kan innehålla sådana värden.
-4. I `transfer`‑grenen används `map[counter] + amt` utan `?? 0`‑skydd. Om `counter_account_id` pekar på ett konto utanför listan får vi tyst en NaN‑spridning vid framtida transfers.
+## Vad du får
 
-När man öppnar `Redigera` läses saldot inte från `balances`‑beräkningen utan från `row.opening_balance` direkt (`String(row.opening_balance)` i formuläret) — därför ser man alltid ett korrekt värde där även när kortet visar NaN.
+I dialogen "Ladda upp transaktioner" (Ekonomi → Transaktioner) läggs ett val till: **Skärmbild (AI)** eller **Excel-fil**. Excel-läget läser filer i Handelsbankens format (som den du bifogade) och visar samma granskningslista som idag innan något sparas.
 
-## Åtgärd
+Filens rader tolkas så här:
+- Rubrikraden hittas automatiskt (raden med `Reskontradatum / Transaktionsdatum / Text / Belopp / Saldo`), så all metadata överst i filen ignoreras.
+- `Transaktionsdatum` blir transaktionens datum, `Text` blir kommentar, `Belopp` blir belopp (negativt = utgift, positivt = inkomst).
+- `Reskontradatum` används enbart för dubblettmatchning (se nedan).
 
-Alla ändringar sker i `src/routes/_authenticated/economy.tsx`, i `Accounts`‑komponenten.
+## Dubblettkontroll
 
-1. Inför en liten hjälpare `toNum(v)` som gör robust parsing:
-   - accepterar `number`, `string` (både `.` och `,` som decimaltecken, trimmar mellanslag),
-   - returnerar `0` om resultatet inte är `Number.isFinite`.
-2. Använd `toNum` för både `a.opening_balance` och `t.amount` när saldot byggs upp.
-3. Härda `transfer`‑grenen: `map[counter] = (map[counter] ?? 0) + amt` (och kör toNum där också).
-4. Byt visningsraden till en NaN‑säker fallback:
-   ```ts
-   const bal = balances[a.id];
-   const shown = Number.isFinite(bal) ? bal : toNum(a.opening_balance);
-   ```
-   och rendera `fmt(shown)`.
-5. Låt saldokortet visa `0,00 kr` istället för `NaN kr` som yttersta skyddsnät (faller ut naturligt av toNum).
+Ingen befintlig transaktion ändras någonsin — importen skapar bara nya rader. Redan importerade rader markeras som "Dubblett" och är avmarkerade i granskningslistan.
+
+En rad räknas som redan importerad om det finns en transaktion på samma konto och huvudman med samma belopp (avrundat till öre) och samma typ, och där något av följande stämmer:
+
+1. samma transaktionsdatum, eller
+2. datumet ligger inom ±4 dagar och texten matchar (jämförelse på normaliserad text: gemener, borttagna mellanslag/specialtecken, och prefixmatchning eftersom banktexten är trunkerad till 15 tecken).
+
+Reskontradatum ingår i steg 2 som extra datumkandidat, eftersom befintliga rader i GodManOS kan ha sparats med bokföringsdatumet istället för transaktionsdatumet.
+
+Kontrollen körs både när filen tolkas och en gång till precis före sparande, plus internt i filen så att två identiska rader i samma fil inte båda sparas.
+
+## Teknisk plan
+
+- Ny beroende: `xlsx` (SheetJS) för att läsa .xlsx i webbläsaren.
+- `src/components/economy/ImportTransactionsDialog.tsx`: lägg till läges-toggle (bild/Excel), Excel-parsning till samma `Row`-typ som idag, och utöka `Row` med `bookingDate` (Reskontradatum, endast för matchning).
+- Bryt ut dubblettlogiken till en hjälpfunktion (`src/lib/import-duplicates.ts`) med textnormalisering + datumtolerans, och använd den i både tolkning och sparande. Filtret hämtar befintliga transaktioner i ett datumintervall som täcker filens rader ±4 dagar.
+- Inga ändringar i databasschema, RLS eller övriga vyer. Belopp sparas som positivt tal med `type` som idag.
+- Sparandet fortsätter använda valt konto (t ex Allkonto) och aktuellt redovisningsår.
 
 ## Verifiering
 
 - Typecheck.
-- Öppna `Ekonomi → Konton` i preview och bekräfta att kortet visar korrekt saldo (t ex `405,43 kr` för Allkonto: 705,49 + 1 900,00 − 2 200,06).
-- Skapa en ny transaktion via `Ny transaktion` och via `Ladda upp transaktioner` och verifiera att saldot uppdateras utan NaN.
-
-Ingen ändring av databasschema, RLS eller andra vyer behövs.
+- Ladda upp den bifogade filen i preview mot Allkonto: alla rader som redan finns ska visas som dubbletter och vara avmarkerade; endast nya rader förvalda.
+- Spara och kontrollera att saldot per konto stämmer med filens saldo (432,43 kr).
