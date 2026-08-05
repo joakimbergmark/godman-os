@@ -85,14 +85,30 @@ function EconomyPage() {
   // `null` means "Alla år".
   const [viewYearId, setViewYearId] = useState<string | null>(yearId);
   const [touched, setTouched] = useState(false);
+  const [viewAccountId, setViewAccountId] = useState<string | null>(null);
   useEffect(() => {
     if (!touched) setViewYearId(yearId);
   }, [yearId, touched]);
 
+  const { data: allAccounts = [] } = useQuery({
+    queryKey: ["accounts", principalId ?? ""],
+    enabled: !!principalId,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("accounts").select("*")
+        .eq("principal_id", principalId!).order("name");
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const viewYear = years.find((y) => y.id === viewYearId) ?? null;
-  const subtitle = viewYearId === null
+  const accountLabel = allAccounts.find((a) => a.id === viewAccountId)?.name ?? null;
+  const subtitle = (viewYearId === null
     ? "Alla redovisningsår"
-    : viewYear ? `Redovisningsår ${viewYear.year}` : "Inget år valt";
+    : viewYear ? `Redovisningsår ${viewYear.year}` : "Inget år valt")
+    + (accountLabel ? ` · ${accountLabel}` : "");
+
+
 
   return (
     <div className="space-y-4">
