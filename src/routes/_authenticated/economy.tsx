@@ -755,7 +755,10 @@ function Overview({ viewYearId, viewAccountId }: { viewYearId: string | null; vi
     }
     const cats = Object.values(byCat).sort((a, b) => b.total - a.total);
     return { income, expense, net: income - expense, cats };
-  }, [txs, categories]);
+  }, [txs, categories, viewAccountId]);
+
+  const shownAccounts = viewAccountId ? accounts.filter((a) => a.id === viewAccountId) : accounts;
+
 
   return (
     <div className="space-y-4">
