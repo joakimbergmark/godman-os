@@ -120,7 +120,7 @@ function EconomyPage() {
           </p>
         </div>
         {principalId && (
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs text-muted-foreground">Visar år:</span>
             <Select
               value={viewYearId ?? "__all"}
@@ -133,6 +133,21 @@ function EconomyPage() {
                 <SelectItem value="__all">Alla år</SelectItem>
                 {years.map((y) => (
                   <SelectItem key={y.id} value={y.id}>Redovisningsår {y.year}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <span className="text-xs text-muted-foreground">Konto:</span>
+            <Select
+              value={viewAccountId ?? "__all"}
+              onValueChange={(v) => setViewAccountId(v === "__all" ? null : v)}
+            >
+              <SelectTrigger className="min-w-[180px] w-auto">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all">Alla konton</SelectItem>
+                {allAccounts.map((a) => (
+                  <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -151,8 +166,9 @@ function EconomyPage() {
             <TabsTrigger value="transactions">Transaktioner</TabsTrigger>
             <TabsTrigger value="accounts">Konton</TabsTrigger>
           </TabsList>
-          <TabsContent value="overview"><Overview viewYearId={viewYearId} /></TabsContent>
-          <TabsContent value="transactions"><Transactions viewYearId={viewYearId} defaultYearId={yearId} principalId={principalId} /></TabsContent>
+          <TabsContent value="overview"><Overview viewYearId={viewYearId} viewAccountId={viewAccountId} /></TabsContent>
+          <TabsContent value="transactions"><Transactions viewYearId={viewYearId} viewAccountId={viewAccountId} defaultYearId={yearId} principalId={principalId} /></TabsContent>
+
           <TabsContent value="accounts"><Accounts principalId={principalId} /></TabsContent>
         </Tabs>
       )}
