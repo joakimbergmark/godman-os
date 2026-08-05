@@ -49,14 +49,28 @@ function toAmount(v: unknown): number {
   return Number.isFinite(n) ? n : NaN;
 }
 
+function cellValue(v: unknown): unknown {
+  if (v && typeof v === "object") {
+    const o = v as { text?: unknown; result?: unknown; richText?: { text: string }[] };
+    if (Array.isArray(o.richText)) return o.richText.map((t) => t.text).join("");
+    if (o.text !== undefined) return o.text;
+    if (o.result !== undefined) return o.result;
+  }
+  return v;
+}
+
 async function parseExcelFile(file: File): Promise<Omit<Row, "key" | "selected" | "duplicate">[]> {
-  const XLSX = await import("xlsx");
-  const buf = await file.arrayBuffer();
-  const wb = XLSX.read(buf, { cellDates: true });
-  const sheetName = wb.SheetNames[0];
-  if (!sheetName) return [];
-  const sheet = wb.Sheets[sheetName];
-  const grid = XLSX.utils.sheet_to_json<unknown[]>(sheet!, { header: 1, blankrows: false, raw: true });
+  const ExcelJS = (await import("exceljs")).default;
+  const wb = new ExcelJS.Workbook();
+  await wb.xlsx.load(await file.arrayBuffer());
+  const ws = wb.worksheets[0];
+  if (!ws) return [];
+
+  const grid: unknown[][] = [];
+  ws.eachRow({ includeEmpty: false }, (row) => {
+    const values = Array.isArray(row.values) ? row.values.slice(1) : [];
+    grid.push(values.map(cellValue));
+  });
 
   const headerIdx = grid.findIndex((r) =>
     (r ?? []).some((c) => /transaktionsdatum/i.test(String(c ?? ""))),
