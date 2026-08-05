@@ -85,14 +85,30 @@ function EconomyPage() {
   // `null` means "Alla år".
   const [viewYearId, setViewYearId] = useState<string | null>(yearId);
   const [touched, setTouched] = useState(false);
+  const [viewAccountId, setViewAccountId] = useState<string | null>(null);
   useEffect(() => {
     if (!touched) setViewYearId(yearId);
   }, [yearId, touched]);
 
+  const { data: allAccounts = [] } = useQuery({
+    queryKey: ["accounts", principalId ?? ""],
+    enabled: !!principalId,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("accounts").select("*")
+        .eq("principal_id", principalId!).order("name");
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const viewYear = years.find((y) => y.id === viewYearId) ?? null;
-  const subtitle = viewYearId === null
+  const accountLabel = allAccounts.find((a) => a.id === viewAccountId)?.name ?? null;
+  const subtitle = (viewYearId === null
     ? "Alla redovisningsår"
-    : viewYear ? `Redovisningsår ${viewYear.year}` : "Inget år valt";
+    : viewYear ? `Redovisningsår ${viewYear.year}` : "Inget år valt")
+    + (accountLabel ? ` · ${accountLabel}` : "");
+
+
 
   return (
     <div className="space-y-4">
@@ -104,7 +120,7 @@ function EconomyPage() {
           </p>
         </div>
         {principalId && (
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs text-muted-foreground">Visar år:</span>
             <Select
               value={viewYearId ?? "__all"}
@@ -117,6 +133,21 @@ function EconomyPage() {
                 <SelectItem value="__all">Alla år</SelectItem>
                 {years.map((y) => (
                   <SelectItem key={y.id} value={y.id}>Redovisningsår {y.year}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <span className="text-xs text-muted-foreground">Konto:</span>
+            <Select
+              value={viewAccountId ?? "__all"}
+              onValueChange={(v) => setViewAccountId(v === "__all" ? null : v)}
+            >
+              <SelectTrigger className="min-w-[180px] w-auto">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all">Alla konton</SelectItem>
+                {allAccounts.map((a) => (
+                  <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -135,8 +166,9 @@ function EconomyPage() {
             <TabsTrigger value="transactions">Transaktioner</TabsTrigger>
             <TabsTrigger value="accounts">Konton</TabsTrigger>
           </TabsList>
-          <TabsContent value="overview"><Overview viewYearId={viewYearId} /></TabsContent>
-          <TabsContent value="transactions"><Transactions viewYearId={viewYearId} defaultYearId={yearId} principalId={principalId} /></TabsContent>
+          <TabsContent value="overview"><Overview viewYearId={viewYearId} viewAccountId={viewAccountId} /></TabsContent>
+          <TabsContent value="transactions"><Transactions viewYearId={viewYearId} viewAccountId={viewAccountId} defaultYearId={yearId} principalId={principalId} /></TabsContent>
+
           <TabsContent value="accounts"><Accounts principalId={principalId} /></TabsContent>
         </Tabs>
       )}
@@ -332,12 +364,14 @@ function useCategories() {
 
 // ---------- Transactions ----------
 function Transactions({
-  viewYearId, defaultYearId, principalId,
+  viewYearId, viewAccountId, defaultYearId, principalId,
 }: {
   viewYearId: string | null;
+  viewAccountId: string | null;
   defaultYearId: string | null;
   principalId: string;
 }) {
+
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -392,6 +426,7 @@ function Transactions({
     const rows = txs.filter((t) => {
       if (filterType !== "all" && t.type !== filterType) return false;
       if (filterCategory !== "all" && t.category_id !== filterCategory) return false;
+      if (viewAccountId && t.account_id !== viewAccountId && t.counter_account_id !== viewAccountId) return false;
       return true;
     });
     const sorted = [...rows].sort((a, b) => {
@@ -401,7 +436,8 @@ function Transactions({
       return sortKey === "amount_desc" ? bv - av : av - bv;
     });
     return sorted;
-  }, [txs, filterType, filterCategory, sortKey]);
+  }, [txs, filterType, filterCategory, sortKey, viewAccountId]);
+
 
   const accountName = (id: string | null) => accounts.find((a) => a.id === id)?.name ?? "—";
   const categoryName = (id: string | null) => categories.find((c) => c.id === id)?.name ?? "";
@@ -684,8 +720,9 @@ function Transactions({
 }
 
 // ---------- Overview ----------
-function Overview({ viewYearId }: { viewYearId: string | null }) {
+function Overview({ viewYearId, viewAccountId }: { viewYearId: string | null; viewAccountId: string | null }) {
   const { principalId } = useAccountingYear();
+
 
   const { data: txs = [] } = useQuery({
     queryKey: ["transactions-overview", viewYearId ?? "all"],
@@ -737,8 +774,12 @@ function Overview({ viewYearId }: { viewYearId: string | null }) {
   const stats = useMemo(() => {
     let income = 0, expense = 0;
     const byCat: Record<string, { name: string; kind: string; total: number }> = {};
-    for (const t of txs) {
+    const rows = viewAccountId
+      ? txs.filter((t) => t.account_id === viewAccountId || t.counter_account_id === viewAccountId)
+      : txs;
+    for (const t of rows) {
       const amt = Number(t.amount);
+
       if (t.type === "income") income += amt;
       else if (t.type === "expense") expense += amt;
       if (t.type !== "transfer" && t.category_id) {
@@ -750,7 +791,10 @@ function Overview({ viewYearId }: { viewYearId: string | null }) {
     }
     const cats = Object.values(byCat).sort((a, b) => b.total - a.total);
     return { income, expense, net: income - expense, cats };
-  }, [txs, categories]);
+  }, [txs, categories, viewAccountId]);
+
+  const shownAccounts = viewAccountId ? accounts.filter((a) => a.id === viewAccountId) : accounts;
+
 
   return (
     <div className="space-y-4">
@@ -772,8 +816,9 @@ function Overview({ viewYearId }: { viewYearId: string | null }) {
       <Card>
         <CardHeader><CardTitle className="text-base">Saldo per konto</CardTitle></CardHeader>
         <CardContent className="space-y-2">
-          {accounts.length === 0 && <p className="text-sm text-muted-foreground">Inga konton.</p>}
-          {accounts.map((a) => {
+          {shownAccounts.length === 0 && <p className="text-sm text-muted-foreground">Inga konton.</p>}
+          {shownAccounts.map((a) => {
+
             const bal = balances[a.id];
             const shown = Number.isFinite(bal) ? bal : toNum(a.opening_balance);
             return (
