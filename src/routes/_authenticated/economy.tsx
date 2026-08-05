@@ -684,8 +684,9 @@ function Transactions({
 }
 
 // ---------- Overview ----------
-function Overview({ viewYearId }: { viewYearId: string | null }) {
+function Overview({ viewYearId, viewAccountId }: { viewYearId: string | null; viewAccountId: string | null }) {
   const { principalId } = useAccountingYear();
+
 
   const { data: txs = [] } = useQuery({
     queryKey: ["transactions-overview", viewYearId ?? "all"],
