@@ -28,7 +28,7 @@ import { toast } from "sonner";
 import { Pencil, Plus, Search, Trash2, ArrowUpDown } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/contacts")({
-  validateSearch: (s: Record<string, unknown>) => ({ highlight: typeof s.highlight === "string" ? s.highlight : undefined }),
+  validateSearch: (s: Record<string, unknown>): { highlight?: string } => ({ highlight: typeof s.highlight === "string" ? s.highlight : undefined }),
   component: ContactsPage,
 });
 

@@ -23,7 +23,7 @@ import { CaseSelector } from "@/components/CaseSelector";
 
 
 export const Route = createFileRoute("/_authenticated/tasks")({
-  validateSearch: (s: Record<string, unknown>) => ({ highlight: typeof s.highlight === "string" ? s.highlight : undefined }),
+  validateSearch: (s: Record<string, unknown>): { highlight?: string } => ({ highlight: typeof s.highlight === "string" ? s.highlight : undefined }),
   component: TasksPage,
 });
 
