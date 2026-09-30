@@ -9,65 +9,79 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedYearOverviewRouteImport } from './routes/_authenticated/year-overview'
-import { Route as AuthenticatedTimelineRouteImport } from './routes/_authenticated/timeline'
-import { Route as AuthenticatedTasksRouteImport } from './routes/_authenticated/tasks'
-import { Route as AuthenticatedPrincipalRouteImport } from './routes/_authenticated/principal'
-import { Route as AuthenticatedObligationsRouteImport } from './routes/_authenticated/obligations'
-import { Route as AuthenticatedGuideRouteImport } from './routes/_authenticated/guide'
-import { Route as AuthenticatedEconomyRouteImport } from './routes/_authenticated/economy'
-import { Route as AuthenticatedDocumentsRouteImport } from './routes/_authenticated/documents'
-import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
-import { Route as AuthenticatedContactsRouteImport } from './routes/_authenticated/contacts'
-import { Route as AuthenticatedCasesRouteImport } from './routes/_authenticated/cases'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedActivitiesRouteImport } from './routes/_authenticated/activities'
-import { Route as AuthenticatedGuideIndexRouteImport } from './routes/_authenticated/guide.index'
+import { Route as AuthenticatedCasesRouteImport } from './routes/_authenticated/cases'
+import { Route as AuthenticatedContactsRouteImport } from './routes/_authenticated/contacts'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedDocumentsRouteImport } from './routes/_authenticated/documents'
+import { Route as AuthenticatedEconomyRouteImport } from './routes/_authenticated/economy'
+import { Route as AuthenticatedGuideRouteImport } from './routes/_authenticated/guide'
+import { Route as AuthenticatedObligationsRouteImport } from './routes/_authenticated/obligations'
+import { Route as AuthenticatedPrincipalRouteImport } from './routes/_authenticated/principal'
+import { Route as AuthenticatedTasksRouteImport } from './routes/_authenticated/tasks'
+import { Route as AuthenticatedTimelineRouteImport } from './routes/_authenticated/timeline'
+import { Route as AuthenticatedYearOverviewRouteImport } from './routes/_authenticated/year-overview'
 import { Route as AuthenticatedCasesIndexRouteImport } from './routes/_authenticated/cases.index'
-import { Route as AuthenticatedObligationsObligationIdRouteImport } from './routes/_authenticated/obligations.$obligationId'
-import { Route as AuthenticatedGuideVidareutvecklingRouteImport } from './routes/_authenticated/guide.vidareutveckling'
-import { Route as AuthenticatedGuideRedovisningsarRouteImport } from './routes/_authenticated/guide.redovisningsar'
-import { Route as AuthenticatedGuideModulerRouteImport } from './routes/_authenticated/guide.moduler'
-import { Route as AuthenticatedGuideKomIgangRouteImport } from './routes/_authenticated/guide.kom-igang'
-import { Route as AuthenticatedGuideEkonomiRouteImport } from './routes/_authenticated/guide.ekonomi'
-import { Route as AuthenticatedGuideArbetsflodeRouteImport } from './routes/_authenticated/guide.arbetsflode'
 import { Route as AuthenticatedCasesCaseIdRouteImport } from './routes/_authenticated/cases.$caseId'
+import { Route as AuthenticatedGuideIndexRouteImport } from './routes/_authenticated/guide.index'
+import { Route as AuthenticatedGuideArbetsflodeRouteImport } from './routes/_authenticated/guide.arbetsflode'
+import { Route as AuthenticatedGuideEkonomiRouteImport } from './routes/_authenticated/guide.ekonomi'
+import { Route as AuthenticatedGuideKomIgangRouteImport } from './routes/_authenticated/guide.kom-igang'
+import { Route as AuthenticatedGuideModulerRouteImport } from './routes/_authenticated/guide.moduler'
+import { Route as AuthenticatedGuideRedovisningsarRouteImport } from './routes/_authenticated/guide.redovisningsar'
+import { Route as AuthenticatedGuideVidareutvecklingRouteImport } from './routes/_authenticated/guide.vidareutveckling'
+import { Route as AuthenticatedObligationsObligationIdRouteImport } from './routes/_authenticated/obligations.$obligationId'
 
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedYearOverviewRoute =
-  AuthenticatedYearOverviewRouteImport.update({
-    id: '/year-overview',
-    path: '/year-overview',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedTimelineRoute = AuthenticatedTimelineRouteImport.update({
-  id: '/timeline',
-  path: '/timeline',
+const AuthenticatedActivitiesRoute = AuthenticatedActivitiesRouteImport.update({
+  id: '/activities',
+  path: '/activities',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedTasksRoute = AuthenticatedTasksRouteImport.update({
-  id: '/tasks',
-  path: '/tasks',
+const AuthenticatedCasesRoute = AuthenticatedCasesRouteImport.update({
+  id: '/cases',
+  path: '/cases',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedPrincipalRoute = AuthenticatedPrincipalRouteImport.update({
-  id: '/principal',
-  path: '/principal',
+const AuthenticatedContactsRoute = AuthenticatedContactsRouteImport.update({
+  id: '/contacts',
+  path: '/contacts',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedDocumentsRoute = AuthenticatedDocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedEconomyRoute = AuthenticatedEconomyRouteImport.update({
+  id: '/economy',
+  path: '/economy',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedGuideRoute = AuthenticatedGuideRouteImport.update({
+  id: '/guide',
+  path: '/guide',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedObligationsRoute =
@@ -76,79 +90,47 @@ const AuthenticatedObligationsRoute =
     path: '/obligations',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedGuideRoute = AuthenticatedGuideRouteImport.update({
-  id: '/guide',
-  path: '/guide',
+const AuthenticatedPrincipalRoute = AuthenticatedPrincipalRouteImport.update({
+  id: '/principal',
+  path: '/principal',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedEconomyRoute = AuthenticatedEconomyRouteImport.update({
-  id: '/economy',
-  path: '/economy',
+const AuthenticatedTasksRoute = AuthenticatedTasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedDocumentsRoute = AuthenticatedDocumentsRouteImport.update({
-  id: '/documents',
-  path: '/documents',
+const AuthenticatedTimelineRoute = AuthenticatedTimelineRouteImport.update({
+  id: '/timeline',
+  path: '/timeline',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedContactsRoute = AuthenticatedContactsRouteImport.update({
-  id: '/contacts',
-  path: '/contacts',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedCasesRoute = AuthenticatedCasesRouteImport.update({
-  id: '/cases',
-  path: '/cases',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedActivitiesRoute = AuthenticatedActivitiesRouteImport.update({
-  id: '/activities',
-  path: '/activities',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedGuideIndexRoute = AuthenticatedGuideIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AuthenticatedGuideRoute,
-} as any)
+const AuthenticatedYearOverviewRoute =
+  AuthenticatedYearOverviewRouteImport.update({
+    id: '/year-overview',
+    path: '/year-overview',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedCasesIndexRoute = AuthenticatedCasesIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AuthenticatedCasesRoute,
 } as any)
-const AuthenticatedObligationsObligationIdRoute =
-  AuthenticatedObligationsObligationIdRouteImport.update({
-    id: '/$obligationId',
-    path: '/$obligationId',
-    getParentRoute: () => AuthenticatedObligationsRoute,
+const AuthenticatedCasesCaseIdRoute =
+  AuthenticatedCasesCaseIdRouteImport.update({
+    id: '/$caseId',
+    path: '/$caseId',
+    getParentRoute: () => AuthenticatedCasesRoute,
   } as any)
-const AuthenticatedGuideVidareutvecklingRoute =
-  AuthenticatedGuideVidareutvecklingRouteImport.update({
-    id: '/vidareutveckling',
-    path: '/vidareutveckling',
-    getParentRoute: () => AuthenticatedGuideRoute,
-  } as any)
-const AuthenticatedGuideRedovisningsarRoute =
-  AuthenticatedGuideRedovisningsarRouteImport.update({
-    id: '/redovisningsar',
-    path: '/redovisningsar',
-    getParentRoute: () => AuthenticatedGuideRoute,
-  } as any)
-const AuthenticatedGuideModulerRoute =
-  AuthenticatedGuideModulerRouteImport.update({
-    id: '/moduler',
-    path: '/moduler',
-    getParentRoute: () => AuthenticatedGuideRoute,
-  } as any)
-const AuthenticatedGuideKomIgangRoute =
-  AuthenticatedGuideKomIgangRouteImport.update({
-    id: '/kom-igang',
-    path: '/kom-igang',
+const AuthenticatedGuideIndexRoute = AuthenticatedGuideIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedGuideRoute,
+} as any)
+const AuthenticatedGuideArbetsflodeRoute =
+  AuthenticatedGuideArbetsflodeRouteImport.update({
+    id: '/arbetsflode',
+    path: '/arbetsflode',
     getParentRoute: () => AuthenticatedGuideRoute,
   } as any)
 const AuthenticatedGuideEkonomiRoute =
@@ -157,17 +139,35 @@ const AuthenticatedGuideEkonomiRoute =
     path: '/ekonomi',
     getParentRoute: () => AuthenticatedGuideRoute,
   } as any)
-const AuthenticatedGuideArbetsflodeRoute =
-  AuthenticatedGuideArbetsflodeRouteImport.update({
-    id: '/arbetsflode',
-    path: '/arbetsflode',
+const AuthenticatedGuideKomIgangRoute =
+  AuthenticatedGuideKomIgangRouteImport.update({
+    id: '/kom-igang',
+    path: '/kom-igang',
     getParentRoute: () => AuthenticatedGuideRoute,
   } as any)
-const AuthenticatedCasesCaseIdRoute =
-  AuthenticatedCasesCaseIdRouteImport.update({
-    id: '/$caseId',
-    path: '/$caseId',
-    getParentRoute: () => AuthenticatedCasesRoute,
+const AuthenticatedGuideModulerRoute =
+  AuthenticatedGuideModulerRouteImport.update({
+    id: '/moduler',
+    path: '/moduler',
+    getParentRoute: () => AuthenticatedGuideRoute,
+  } as any)
+const AuthenticatedGuideRedovisningsarRoute =
+  AuthenticatedGuideRedovisningsarRouteImport.update({
+    id: '/redovisningsar',
+    path: '/redovisningsar',
+    getParentRoute: () => AuthenticatedGuideRoute,
+  } as any)
+const AuthenticatedGuideVidareutvecklingRoute =
+  AuthenticatedGuideVidareutvecklingRouteImport.update({
+    id: '/vidareutveckling',
+    path: '/vidareutveckling',
+    getParentRoute: () => AuthenticatedGuideRoute,
+  } as any)
+const AuthenticatedObligationsObligationIdRoute =
+  AuthenticatedObligationsObligationIdRouteImport.update({
+    id: '/$obligationId',
+    path: '/$obligationId',
+    getParentRoute: () => AuthenticatedObligationsRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -336,11 +336,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -350,81 +350,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/year-overview': {
-      id: '/_authenticated/year-overview'
-      path: '/year-overview'
-      fullPath: '/year-overview'
-      preLoaderRoute: typeof AuthenticatedYearOverviewRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/timeline': {
-      id: '/_authenticated/timeline'
-      path: '/timeline'
-      fullPath: '/timeline'
-      preLoaderRoute: typeof AuthenticatedTimelineRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/tasks': {
-      id: '/_authenticated/tasks'
-      path: '/tasks'
-      fullPath: '/tasks'
-      preLoaderRoute: typeof AuthenticatedTasksRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/principal': {
-      id: '/_authenticated/principal'
-      path: '/principal'
-      fullPath: '/principal'
-      preLoaderRoute: typeof AuthenticatedPrincipalRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/obligations': {
-      id: '/_authenticated/obligations'
-      path: '/obligations'
-      fullPath: '/obligations'
-      preLoaderRoute: typeof AuthenticatedObligationsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/guide': {
-      id: '/_authenticated/guide'
-      path: '/guide'
-      fullPath: '/guide'
-      preLoaderRoute: typeof AuthenticatedGuideRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/economy': {
-      id: '/_authenticated/economy'
-      path: '/economy'
-      fullPath: '/economy'
-      preLoaderRoute: typeof AuthenticatedEconomyRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/documents': {
-      id: '/_authenticated/documents'
-      path: '/documents'
-      fullPath: '/documents'
-      preLoaderRoute: typeof AuthenticatedDocumentsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/dashboard': {
-      id: '/_authenticated/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/contacts': {
-      id: '/_authenticated/contacts'
-      path: '/contacts'
-      fullPath: '/contacts'
-      preLoaderRoute: typeof AuthenticatedContactsRouteImport
+    '/_authenticated/activities': {
+      id: '/_authenticated/activities'
+      path: '/activities'
+      fullPath: '/activities'
+      preLoaderRoute: typeof AuthenticatedActivitiesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/cases': {
@@ -434,19 +371,75 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCasesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/activities': {
-      id: '/_authenticated/activities'
-      path: '/activities'
-      fullPath: '/activities'
-      preLoaderRoute: typeof AuthenticatedActivitiesRouteImport
+    '/_authenticated/contacts': {
+      id: '/_authenticated/contacts'
+      path: '/contacts'
+      fullPath: '/contacts'
+      preLoaderRoute: typeof AuthenticatedContactsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/guide/': {
-      id: '/_authenticated/guide/'
-      path: '/'
-      fullPath: '/guide/'
-      preLoaderRoute: typeof AuthenticatedGuideIndexRouteImport
-      parentRoute: typeof AuthenticatedGuideRoute
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/documents': {
+      id: '/_authenticated/documents'
+      path: '/documents'
+      fullPath: '/documents'
+      preLoaderRoute: typeof AuthenticatedDocumentsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/economy': {
+      id: '/_authenticated/economy'
+      path: '/economy'
+      fullPath: '/economy'
+      preLoaderRoute: typeof AuthenticatedEconomyRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/guide': {
+      id: '/_authenticated/guide'
+      path: '/guide'
+      fullPath: '/guide'
+      preLoaderRoute: typeof AuthenticatedGuideRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/obligations': {
+      id: '/_authenticated/obligations'
+      path: '/obligations'
+      fullPath: '/obligations'
+      preLoaderRoute: typeof AuthenticatedObligationsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/principal': {
+      id: '/_authenticated/principal'
+      path: '/principal'
+      fullPath: '/principal'
+      preLoaderRoute: typeof AuthenticatedPrincipalRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/tasks': {
+      id: '/_authenticated/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof AuthenticatedTasksRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/timeline': {
+      id: '/_authenticated/timeline'
+      path: '/timeline'
+      fullPath: '/timeline'
+      preLoaderRoute: typeof AuthenticatedTimelineRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/year-overview': {
+      id: '/_authenticated/year-overview'
+      path: '/year-overview'
+      fullPath: '/year-overview'
+      preLoaderRoute: typeof AuthenticatedYearOverviewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/cases/': {
       id: '/_authenticated/cases/'
@@ -455,46 +448,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCasesIndexRouteImport
       parentRoute: typeof AuthenticatedCasesRoute
     }
-    '/_authenticated/obligations/$obligationId': {
-      id: '/_authenticated/obligations/$obligationId'
-      path: '/$obligationId'
-      fullPath: '/obligations/$obligationId'
-      preLoaderRoute: typeof AuthenticatedObligationsObligationIdRouteImport
-      parentRoute: typeof AuthenticatedObligationsRoute
+    '/_authenticated/cases/$caseId': {
+      id: '/_authenticated/cases/$caseId'
+      path: '/$caseId'
+      fullPath: '/cases/$caseId'
+      preLoaderRoute: typeof AuthenticatedCasesCaseIdRouteImport
+      parentRoute: typeof AuthenticatedCasesRoute
     }
-    '/_authenticated/guide/vidareutveckling': {
-      id: '/_authenticated/guide/vidareutveckling'
-      path: '/vidareutveckling'
-      fullPath: '/guide/vidareutveckling'
-      preLoaderRoute: typeof AuthenticatedGuideVidareutvecklingRouteImport
-      parentRoute: typeof AuthenticatedGuideRoute
-    }
-    '/_authenticated/guide/redovisningsar': {
-      id: '/_authenticated/guide/redovisningsar'
-      path: '/redovisningsar'
-      fullPath: '/guide/redovisningsar'
-      preLoaderRoute: typeof AuthenticatedGuideRedovisningsarRouteImport
-      parentRoute: typeof AuthenticatedGuideRoute
-    }
-    '/_authenticated/guide/moduler': {
-      id: '/_authenticated/guide/moduler'
-      path: '/moduler'
-      fullPath: '/guide/moduler'
-      preLoaderRoute: typeof AuthenticatedGuideModulerRouteImport
-      parentRoute: typeof AuthenticatedGuideRoute
-    }
-    '/_authenticated/guide/kom-igang': {
-      id: '/_authenticated/guide/kom-igang'
-      path: '/kom-igang'
-      fullPath: '/guide/kom-igang'
-      preLoaderRoute: typeof AuthenticatedGuideKomIgangRouteImport
-      parentRoute: typeof AuthenticatedGuideRoute
-    }
-    '/_authenticated/guide/ekonomi': {
-      id: '/_authenticated/guide/ekonomi'
-      path: '/ekonomi'
-      fullPath: '/guide/ekonomi'
-      preLoaderRoute: typeof AuthenticatedGuideEkonomiRouteImport
+    '/_authenticated/guide/': {
+      id: '/_authenticated/guide/'
+      path: '/'
+      fullPath: '/guide/'
+      preLoaderRoute: typeof AuthenticatedGuideIndexRouteImport
       parentRoute: typeof AuthenticatedGuideRoute
     }
     '/_authenticated/guide/arbetsflode': {
@@ -504,12 +469,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedGuideArbetsflodeRouteImport
       parentRoute: typeof AuthenticatedGuideRoute
     }
-    '/_authenticated/cases/$caseId': {
-      id: '/_authenticated/cases/$caseId'
-      path: '/$caseId'
-      fullPath: '/cases/$caseId'
-      preLoaderRoute: typeof AuthenticatedCasesCaseIdRouteImport
-      parentRoute: typeof AuthenticatedCasesRoute
+    '/_authenticated/guide/ekonomi': {
+      id: '/_authenticated/guide/ekonomi'
+      path: '/ekonomi'
+      fullPath: '/guide/ekonomi'
+      preLoaderRoute: typeof AuthenticatedGuideEkonomiRouteImport
+      parentRoute: typeof AuthenticatedGuideRoute
+    }
+    '/_authenticated/guide/kom-igang': {
+      id: '/_authenticated/guide/kom-igang'
+      path: '/kom-igang'
+      fullPath: '/guide/kom-igang'
+      preLoaderRoute: typeof AuthenticatedGuideKomIgangRouteImport
+      parentRoute: typeof AuthenticatedGuideRoute
+    }
+    '/_authenticated/guide/moduler': {
+      id: '/_authenticated/guide/moduler'
+      path: '/moduler'
+      fullPath: '/guide/moduler'
+      preLoaderRoute: typeof AuthenticatedGuideModulerRouteImport
+      parentRoute: typeof AuthenticatedGuideRoute
+    }
+    '/_authenticated/guide/redovisningsar': {
+      id: '/_authenticated/guide/redovisningsar'
+      path: '/redovisningsar'
+      fullPath: '/guide/redovisningsar'
+      preLoaderRoute: typeof AuthenticatedGuideRedovisningsarRouteImport
+      parentRoute: typeof AuthenticatedGuideRoute
+    }
+    '/_authenticated/guide/vidareutveckling': {
+      id: '/_authenticated/guide/vidareutveckling'
+      path: '/vidareutveckling'
+      fullPath: '/guide/vidareutveckling'
+      preLoaderRoute: typeof AuthenticatedGuideVidareutvecklingRouteImport
+      parentRoute: typeof AuthenticatedGuideRoute
+    }
+    '/_authenticated/obligations/$obligationId': {
+      id: '/_authenticated/obligations/$obligationId'
+      path: '/$obligationId'
+      fullPath: '/obligations/$obligationId'
+      preLoaderRoute: typeof AuthenticatedObligationsObligationIdRouteImport
+      parentRoute: typeof AuthenticatedObligationsRoute
     }
   }
 }
