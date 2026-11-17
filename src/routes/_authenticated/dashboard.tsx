@@ -25,12 +25,13 @@ const DAY = 24 * 60 * 60 * 1000;
 const todayStr = () => new Date(new Date().toDateString()).toISOString().slice(0, 10);
 
 function Dashboard() {
-  const { selectedId: yearId } = useAccountingYear();
+  const { selectedId: yearId, principalId } = useAccountingYear();
   const navigate = useNavigate();
 
   const { data: principal } = useQuery({
-    queryKey: ["dash-principal"],
-    queryFn: async () => (await supabase.from("principal").select("full_name").limit(1).maybeSingle()).data,
+    queryKey: ["dash-principal", principalId],
+    enabled: !!principalId,
+    queryFn: async () => (await supabase.from("principal").select("full_name").eq("id", principalId!).maybeSingle()).data,
   });
 
   const { data: cases = [] } = useQuery({
@@ -121,7 +122,7 @@ function Dashboard() {
         supabase.from("activities").select("id,title,created_at,case_id").eq("accounting_year_id", yearId!).order("created_at", { ascending: false }).limit(10),
         supabase.from("documents").select("id,title,storage_path,created_at,case_id").eq("accounting_year_id", yearId!).order("created_at", { ascending: false }).limit(10),
         supabase.from("tasks").select("id,title,status,created_at,case_id").eq("accounting_year_id", yearId!).order("created_at", { ascending: false }).limit(10),
-        supabase.from("case_decisions").select("id,title,created_at,case_id").order("created_at", { ascending: false }).limit(10),
+        supabase.from("case_decisions").select("id,title,created_at,case_id").eq("principal_id", principalId!).order("created_at", { ascending: false }).limit(10),
         supabase.from("transactions").select("id,comment,amount,created_at,case_id").eq("accounting_year_id", yearId!).order("created_at", { ascending: false }).limit(10),
       ]);
       const out: TimelineItem[] = [];

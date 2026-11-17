@@ -261,9 +261,9 @@ function CaseHeader({ c, authorityContact, onUpdated }: { c: any; authorityConta
     authority_contact_id: c.authority_contact_id ?? "", notes: c.notes ?? "",
   });
   const { data: contacts = [] } = useQuery({
-    queryKey: ["contacts-min"],
+    queryKey: ["contacts-min", c.principal_id],
     queryFn: async () => {
-      const { data, error } = await supabase.from("contacts").select("id, name").order("name");
+      const { data, error } = await supabase.from("contacts").select("id, name").eq("principal_id", c.principal_id).order("name");
       if (error) throw error; return data;
     },
   });

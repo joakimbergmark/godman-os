@@ -78,18 +78,18 @@ function ObligationsPage() {
   });
 
   const { data: contacts = [] } = useQuery({
-    queryKey: ["contacts-lite"],
+    queryKey: ["contacts-lite", principalId],
     queryFn: async () => {
-      const { data, error } = await supabase.from("contacts").select("id,name").order("name");
+      const { data, error } = await supabase.from("contacts").select("id,name").eq("principal_id", principalId!).order("name");
       if (error) throw error;
       return data;
     },
   });
 
   const { data: documents = [] } = useQuery({
-    queryKey: ["documents-lite-obl"],
+    queryKey: ["documents-lite-obl", principalId],
     queryFn: async () => {
-      const { data, error } = await supabase.from("documents").select("id,title").order("created_at", { ascending: false }).limit(200);
+      const { data, error } = await supabase.from("documents").select("id,title").eq("principal_id", principalId!).order("created_at", { ascending: false }).limit(200);
       if (error) throw error;
       return data;
     },

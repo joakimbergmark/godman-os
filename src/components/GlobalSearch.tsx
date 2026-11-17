@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Search, Loader2, Activity, FileText, Users, CheckSquare, User, Wallet } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAccountingYear } from "@/lib/accounting-year";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
@@ -16,7 +17,8 @@ type Hit =
 
 const escapeIlike = (q: string) => q.replace(/[%_,()]/g, " ").trim();
 
-async function runSearch(raw: string): Promise<Hit[]> {
+async function runSearch(raw: string, pid: string | null): Promise<Hit[]> {
+  if (!pid) return [];
   const q = escapeIlike(raw);
   if (q.length < 2) return [];
   const like = `%${q}%`;
@@ -30,19 +32,19 @@ async function runSearch(raw: string): Promise<Hit[]> {
 
   const [act, doc, con, tsk, pri, trx] = await Promise.all([
     supabase.from("activities")
-      .select("id,title,description,activity_date")
+      .select("id,title,description,activity_date").eq("principal_id", pid)
       .or(`title.ilike.${like},description.ilike.${like},category.ilike.${like}`)
       .limit(limit),
     supabase.from("documents")
-      .select("id,title,category,document_date,storage_path,file_name,comment")
+      .select("id,title,category,document_date,storage_path,file_name,comment").eq("principal_id", pid)
       .or(`title.ilike.${like},category.ilike.${like},comment.ilike.${like},file_name.ilike.${like}`)
       .limit(limit),
     supabase.from("contacts")
-      .select("id,name,organization,email,phone,address,city,notes")
+      .select("id,name,organization,email,phone,address,city,notes").eq("principal_id", pid)
       .or(`name.ilike.${like},organization.ilike.${like},email.ilike.${like},phone.ilike.${like},address.ilike.${like},city.ilike.${like},notes.ilike.${like}`)
       .limit(limit),
     supabase.from("tasks")
-      .select("id,title,description,status,priority")
+      .select("id,title,description,status,priority").eq("principal_id", pid)
       .or(`title.ilike.${like},description.ilike.${like},status.ilike.${like},priority.ilike.${like}`)
       .limit(limit),
     supabase.from("principal")
@@ -50,7 +52,7 @@ async function runSearch(raw: string): Promise<Hit[]> {
       .or(`full_name.ilike.${like},personal_number.ilike.${like},email.ilike.${like},phone.ilike.${like},address.ilike.${like},city.ilike.${like},notes.ilike.${like}`)
       .limit(limit),
     supabase.from("transactions")
-      .select("id,comment,amount,type,transaction_date")
+      .select("id,comment,amount,type,transaction_date").eq("principal_id", pid)
       .or(txFilter)
       .limit(limit),
   ]);
@@ -70,6 +72,7 @@ const STATUS_LABEL: Record<string, string> = { open: "Öppen", in_progress: "På
 
 export function GlobalSearch() {
   const navigate = useNavigate();
+  const { principalId } = useAccountingYear();
   const [q, setQ] = useState("");
   const [debounced, setDebounced] = useState("");
   const [hits, setHits] = useState<Hit[]>([]);
@@ -87,11 +90,11 @@ export function GlobalSearch() {
     let cancelled = false;
     if (debounced.trim().length < 2) { setHits([]); return; }
     setLoading(true);
-    runSearch(debounced).then((h) => { if (!cancelled) setHits(h); })
+    runSearch(debounced, principalId).then((h) => { if (!cancelled) setHits(h); })
       .catch(() => { if (!cancelled) setHits([]); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [debounced]);
+  }, [debounced, principalId]);
 
   useEffect(() => {
     const onDoc = (e: MouseEvent) => {

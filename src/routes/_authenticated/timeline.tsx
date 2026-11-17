@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAccountingYear } from "@/lib/accounting-year";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Activity, FileText, CheckSquare, Clock } from "lucide-react";
@@ -22,15 +23,17 @@ type Item = {
 
 function TimelinePage() {
   const navigate = useNavigate();
+  const { principalId } = useAccountingYear();
 
   const { data = [], isLoading } = useQuery({
-    queryKey: ["timeline"],
+    queryKey: ["timeline", principalId],
+    enabled: !!principalId,
     queryFn: async (): Promise<Item[]> => {
       const [act, doc, tsk, dec] = await Promise.all([
-        supabase.from("activities").select("id,title,description,activity_date,category,created_at,case_id").order("created_at", { ascending: false }).limit(100),
-        supabase.from("documents").select("id,title,category,file_name,storage_path,document_date,created_at,case_id").order("created_at", { ascending: false }).limit(100),
-        supabase.from("tasks").select("id,title,description,status,deadline,priority,created_at,updated_at,case_id").order("created_at", { ascending: false }).limit(100),
-        supabase.from("case_decisions").select("id,title,description,decision_date,case_id,created_at").order("created_at", { ascending: false }).limit(100),
+        supabase.from("activities").select("id,title,description,activity_date,category,created_at,case_id").eq("principal_id", principalId!).order("created_at", { ascending: false }).limit(100),
+        supabase.from("documents").select("id,title,category,file_name,storage_path,document_date,created_at,case_id").eq("principal_id", principalId!).order("created_at", { ascending: false }).limit(100),
+        supabase.from("tasks").select("id,title,description,status,deadline,priority,created_at,updated_at,case_id").eq("principal_id", principalId!).order("created_at", { ascending: false }).limit(100),
+        supabase.from("case_decisions").select("id,title,description,decision_date,case_id,created_at").eq("principal_id", principalId!).order("created_at", { ascending: false }).limit(100),
       ]);
       const items: Item[] = [];
       (act.data ?? []).forEach((r) => items.push({

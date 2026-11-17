@@ -395,9 +395,9 @@ function Transactions({
   });
   const { data: categories = [] } = useCategories();
   const { data: documents = [] } = useQuery({
-    queryKey: ["documents-lite"],
+    queryKey: ["documents-lite", principalId],
     queryFn: async () => {
-      const { data, error } = await supabase.from("documents").select("id,title").order("created_at", { ascending: false }).limit(200);
+      const { data, error } = await supabase.from("documents").select("id,title").eq("principal_id", principalId!).order("created_at", { ascending: false }).limit(200);
       if (error) throw error;
       return data;
     },
@@ -725,9 +725,10 @@ function Overview({ viewYearId, viewAccountId }: { viewYearId: string | null; vi
 
 
   const { data: txs = [] } = useQuery({
-    queryKey: ["transactions-overview", viewYearId ?? "all"],
+    queryKey: ["transactions-overview", viewYearId ?? "all", principalId],
+    enabled: !!principalId,
     queryFn: async () => {
-      let q = supabase.from("transactions").select("*");
+      let q = supabase.from("transactions").select("*").eq("principal_id", principalId!);
       if (viewYearId) q = q.eq("accounting_year_id", viewYearId);
       const { data, error } = await q;
       if (error) throw error;

@@ -10,7 +10,11 @@ export type AccountingYear = {
   notes: string | null;
 };
 
+export type PrincipalLite = { id: string; full_name: string };
+
 type Ctx = {
+  principals: PrincipalLite[];
+  setPrincipalId: (id: string) => void;
   years: AccountingYear[];
   selected: AccountingYear | null;
   selectedId: string | null;
@@ -22,6 +26,7 @@ type Ctx = {
 
 const AccountingYearContext = createContext<Ctx | null>(null);
 const STORAGE_KEY = "godman.selectedAccountingYearId";
+const PRINCIPAL_KEY = "godman.selectedPrincipalId";
 
 export function AccountingYearProvider({ children }: { children: ReactNode }) {
   const qc = useQueryClient();
@@ -30,14 +35,28 @@ export function AccountingYearProvider({ children }: { children: ReactNode }) {
     return localStorage.getItem(STORAGE_KEY);
   });
 
-  const { data: principalId = null } = useQuery({
+  const [storedPrincipal, setStoredPrincipal] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return localStorage.getItem(PRINCIPAL_KEY);
+  });
+
+  const { data: principals = [] } = useQuery({
     queryKey: ["principal-id"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("principal").select("id").limit(1).maybeSingle();
+      const { data, error } = await supabase.from("principal").select("id,full_name").order("created_at");
       if (error) throw error;
-      return data?.id ?? null;
+      return (data ?? []) as PrincipalLite[];
     },
   });
+
+  const principalId =
+    principals.find((p) => p.id === storedPrincipal)?.id ?? principals[0]?.id ?? null;
+
+  const setPrincipalId = (id: string) => {
+    setStoredPrincipal(id);
+    localStorage.setItem(PRINCIPAL_KEY, id);
+    qc.invalidateQueries();
+  };
 
   const { data: years = [], isLoading } = useQuery({
     queryKey: ["accounting-years", principalId],
@@ -75,6 +94,8 @@ export function AccountingYearProvider({ children }: { children: ReactNode }) {
   );
 
   const value: Ctx = {
+    principals,
+    setPrincipalId,
     years,
     selected,
     selectedId,

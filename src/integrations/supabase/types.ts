@@ -118,6 +118,7 @@ export type Database = {
           description: string | null
           id: string
           owner_id: string
+          principal_id: string | null
           tags: string[] | null
           title: string
           updated_at: string
@@ -131,6 +132,7 @@ export type Database = {
           description?: string | null
           id?: string
           owner_id: string
+          principal_id?: string | null
           tags?: string[] | null
           title: string
           updated_at?: string
@@ -144,6 +146,7 @@ export type Database = {
           description?: string | null
           id?: string
           owner_id?: string
+          principal_id?: string | null
           tags?: string[] | null
           title?: string
           updated_at?: string
@@ -163,6 +166,13 @@ export type Database = {
             referencedRelation: "cases"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "activities_principal_id_fkey"
+            columns: ["principal_id"]
+            isOneToOne: false
+            referencedRelation: "principal"
+            referencedColumns: ["id"]
+          },
         ]
       }
       case_decisions: {
@@ -173,6 +183,7 @@ export type Database = {
           description: string | null
           id: string
           owner_id: string
+          principal_id: string | null
           title: string
           updated_at: string
         }
@@ -183,6 +194,7 @@ export type Database = {
           description?: string | null
           id?: string
           owner_id: string
+          principal_id?: string | null
           title: string
           updated_at?: string
         }
@@ -193,6 +205,7 @@ export type Database = {
           description?: string | null
           id?: string
           owner_id?: string
+          principal_id?: string | null
           title?: string
           updated_at?: string
         }
@@ -202,6 +215,13 @@ export type Database = {
             columns: ["case_id"]
             isOneToOne: false
             referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "case_decisions_principal_id_fkey"
+            columns: ["principal_id"]
+            isOneToOne: false
+            referencedRelation: "principal"
             referencedColumns: ["id"]
           },
         ]
@@ -302,6 +322,7 @@ export type Database = {
           owner_id: string
           phone: string | null
           postal_code: string | null
+          principal_id: string | null
           updated_at: string
         }
         Insert: {
@@ -317,6 +338,7 @@ export type Database = {
           owner_id: string
           phone?: string | null
           postal_code?: string | null
+          principal_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -332,9 +354,18 @@ export type Database = {
           owner_id?: string
           phone?: string | null
           postal_code?: string | null
+          principal_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "contacts_principal_id_fkey"
+            columns: ["principal_id"]
+            isOneToOne: false
+            referencedRelation: "principal"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       documents: {
         Row: {
@@ -348,6 +379,7 @@ export type Database = {
           id: string
           mime_type: string | null
           owner_id: string
+          principal_id: string | null
           size_bytes: number | null
           storage_path: string
           title: string
@@ -364,6 +396,7 @@ export type Database = {
           id?: string
           mime_type?: string | null
           owner_id: string
+          principal_id?: string | null
           size_bytes?: number | null
           storage_path: string
           title: string
@@ -380,6 +413,7 @@ export type Database = {
           id?: string
           mime_type?: string | null
           owner_id?: string
+          principal_id?: string | null
           size_bytes?: number | null
           storage_path?: string
           title?: string
@@ -398,6 +432,13 @@ export type Database = {
             columns: ["case_id"]
             isOneToOne: false
             referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_principal_id_fkey"
+            columns: ["principal_id"]
+            isOneToOne: false
+            referencedRelation: "principal"
             referencedColumns: ["id"]
           },
         ]
@@ -555,6 +596,7 @@ export type Database = {
           description: string | null
           id: string
           owner_id: string
+          principal_id: string | null
           priority: string
           status: string
           title: string
@@ -568,6 +610,7 @@ export type Database = {
           description?: string | null
           id?: string
           owner_id: string
+          principal_id?: string | null
           priority?: string
           status?: string
           title: string
@@ -581,6 +624,7 @@ export type Database = {
           description?: string | null
           id?: string
           owner_id?: string
+          principal_id?: string | null
           priority?: string
           status?: string
           title?: string
@@ -599,6 +643,13 @@ export type Database = {
             columns: ["case_id"]
             isOneToOne: false
             referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_principal_id_fkey"
+            columns: ["principal_id"]
+            isOneToOne: false
+            referencedRelation: "principal"
             referencedColumns: ["id"]
           },
         ]

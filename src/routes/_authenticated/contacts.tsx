@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
+import { useAccountingYear } from "@/lib/accounting-year";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -54,6 +55,7 @@ function ContactsPage() {
   const qc = useQueryClient();
   const { highlight } = Route.useSearch();
   const navigate = useNavigate();
+  const { principalId } = useAccountingYear();
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<"name" | "category" | "organization">("name");
   const [open, setOpen] = useState(false);
@@ -61,9 +63,10 @@ function ContactsPage() {
   const [form, setForm] = useState<Form>(empty);
 
   const { data = [] } = useQuery({
-    queryKey: ["contacts"],
+    queryKey: ["contacts", principalId],
+    enabled: !!principalId,
     queryFn: async () => {
-      const { data, error } = await supabase.from("contacts").select("*").order("name");
+      const { data, error } = await supabase.from("contacts").select("*").eq("principal_id", principalId!).order("name");
       if (error) throw error;
       return data;
     },
@@ -133,7 +136,7 @@ function ContactsPage() {
     };
     const res = editing
       ? await supabase.from("contacts").update(base).eq("id", editing)
-      : await supabase.from("contacts").insert({ owner_id, ...base });
+      : await supabase.from("contacts").insert({ owner_id, principal_id: principalId, ...base });
     if (res.error) return toast.error(res.error.message);
     toast.success(editing ? "Sparad" : "Tillagd");
     setOpen(false);

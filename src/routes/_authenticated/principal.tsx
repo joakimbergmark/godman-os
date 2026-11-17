@@ -9,6 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { useAccountingYear } from "@/lib/accounting-year";
+import { Badge } from "@/components/ui/badge";
+import { Plus, UserRound } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/principal")({
   component: PrincipalPage,
@@ -44,18 +47,23 @@ function PrincipalPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState<FormState>(empty);
   const [saving, setSaving] = useState(false);
+  const { principals, principalId, setPrincipalId, refresh } = useAccountingYear();
+  const [editId, setEditId] = useState<string | null | "new">(null);
+  const currentId = editId === "new" ? null : (editId ?? principalId);
 
 
   const { data, isLoading } = useQuery({
-    queryKey: ["principal"],
+    queryKey: ["principal", currentId],
     queryFn: async () => {
-      const { data, error } = await supabase.from("principal").select("*").limit(1).maybeSingle();
+      if (!currentId) return null;
+      const { data, error } = await supabase.from("principal").select("*").eq("id", currentId).maybeSingle();
       if (error) throw error;
       return data;
     },
   });
 
   useEffect(() => {
+    if (!currentId) { setForm(empty); return; }
     if (data) {
       setForm({
         full_name: data.full_name ?? "",
@@ -68,7 +76,7 @@ function PrincipalPage() {
         notes: data.notes ?? "",
       });
     }
-  }, [data]);
+  }, [data, currentId]);
 
   const save = async () => {
     const parsed = schema.safeParse(form);
@@ -97,9 +105,12 @@ function PrincipalPage() {
         const { error } = await supabase.from("principal").update(base).eq("id", data.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("principal").insert({ owner_id, ...base });
+        const { data: created, error } = await supabase.from("principal").insert({ owner_id, ...base }).select("id").single();
         if (error) throw error;
+        setPrincipalId(created.id);
+        setEditId(created.id);
       }
+      refresh();
 
       toast.success("Sparat");
       qc.invalidateQueries({ queryKey: ["principal"] });
@@ -113,11 +124,13 @@ function PrincipalPage() {
 
   const del = async () => {
     if (!data?.id) return;
-    if (!confirm("Ta bort huvudmannens uppgifter?")) return;
+    if (!confirm("Ta bort huvudmannen? All data kopplad till personen kan försvinna.")) return;
     const { error } = await supabase.from("principal").delete().eq("id", data.id);
     if (error) return toast.error(error.message);
     toast.success("Borttagen");
     setForm(empty);
+    setEditId(null);
+    refresh();
     qc.invalidateQueries({ queryKey: ["principal"] });
     qc.invalidateQueries({ queryKey: ["dashboard"] });
   };
@@ -125,13 +138,36 @@ function PrincipalPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold">Huvudman</h1>
-        <p className="text-sm text-muted-foreground">Personuppgifter och anteckningar</p>
+        <h1 className="text-2xl font-semibold">Huvudmän</h1>
+        <p className="text-sm text-muted-foreground">Personer du är god man för. Välj vem du arbetar med i toppmenyn.</p>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        {principals.map((p) => (
+          <Button
+            key={p.id}
+            variant={currentId === p.id ? "default" : "outline"}
+            onClick={() => setEditId(p.id)}
+            className="gap-2"
+          >
+            <UserRound className="h-4 w-4" />
+            {p.full_name}
+            {p.id === principalId && <Badge variant="secondary" className="ml-1">Aktiv</Badge>}
+          </Button>
+        ))}
+        <Button variant={editId === "new" ? "default" : "ghost"} onClick={() => setEditId("new")}>
+          <Plus className="h-4 w-4 mr-1" /> Ny huvudman
+        </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Uppgifter</CardTitle>
+          <div className="flex items-center justify-between gap-2">
+            <CardTitle className="text-base">{currentId ? "Uppgifter" : "Ny huvudman"}</CardTitle>
+            {currentId && currentId !== principalId && (
+              <Button size="sm" variant="outline" onClick={() => setPrincipalId(currentId)}>Arbeta med denna person</Button>
+            )}
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           {isLoading ? (

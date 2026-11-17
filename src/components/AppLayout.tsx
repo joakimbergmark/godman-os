@@ -39,13 +39,14 @@ import { useQueryClient } from "@tanstack/react-query";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { AccountingYearProvider } from "@/lib/accounting-year";
 import { AccountingYearSelector } from "@/components/AccountingYearSelector";
+import { PrincipalSelector } from "@/components/PrincipalSelector";
 
 const items = [
   { title: "Översikt", url: "/dashboard", icon: LayoutDashboard },
   { title: "Tidslinje", url: "/timeline", icon: Clock },
   { title: "Ärenden", url: "/cases", icon: Briefcase },
   { title: "Åtaganden", url: "/obligations", icon: ShieldCheckIcon },
-  { title: "Huvudman", url: "/principal", icon: User },
+  { title: "Huvudmän", url: "/principal", icon: User },
   { title: "Kontakter", url: "/contacts", icon: Users },
   { title: "Aktiviteter", url: "/activities", icon: Activity },
   { title: "Ekonomi", url: "/economy", icon: Coins },
@@ -131,6 +132,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
               <div className="flex-1 flex justify-center">
                 <GlobalSearch />
               </div>
+              <PrincipalSelector />
               <AccountingYearSelector />
             </header>
             <main className="flex-1 p-4 sm:p-6 max-w-6xl w-full mx-auto">{children}</main>
